@@ -14,7 +14,7 @@ import "./Proxyable.sol";
 contract KelpAirdrop is Proxyable {
     using SafeMath for uint256;
 
-    IKelpToken public immutable KELP;
+    IKelpToken public immutable kelpToken;
 
     uint256 private constant decimalFactor = 10**18;
     uint256 public constant INITIAL_SUPPLY = 1000000000 * decimalFactor;
@@ -84,16 +84,16 @@ contract KelpAirdrop is Proxyable {
     constructor(
         address _proxy,
         uint256 _startTime,
-        IKelpToken _kelp
+        IKelpToken _kelpToken
     ) Proxyable(payable(_proxy)) {
         require(
             _startTime >= block.timestamp,
             "Start time can't be in the past"
         );
-        require(address(_kelp) != address(0), "invalid Kelp address");
+        require(address(_kelpToken) != address(0), "invalid Kelp address");
 
         startTime = _startTime;
-        KELP = _kelp;
+        kelpToken = _kelpToken;
     }
 
     /**
@@ -362,7 +362,7 @@ contract KelpAirdrop is Proxyable {
         for (uint256 i = 0; i < _recipient.length; i++) {
             if (!airdrops[_recipient[i]]) {
                 airdrops[_recipient[i]] = true;
-                require(KELP.transfer(_recipient[i], 250 * decimalFactor));
+                require(kelpToken.transfer(_recipient[i], 250 * decimalFactor));
                 airdropped = airdropped.add(250 * decimalFactor);
             }
         }
@@ -397,7 +397,7 @@ contract KelpAirdrop is Proxyable {
             allocations[_recipient].amountClaimed
         );
         allocations[_recipient].amountClaimed = newAmountClaimed;
-        require(KELP.transfer(_recipient, tokensToTransfer));
+        require(kelpToken.transfer(_recipient, tokensToTransfer));
         grandTotalClaimed = grandTotalClaimed.add(tokensToTransfer);
         emit LogKelpClaimed(
             _recipient,
