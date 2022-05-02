@@ -19,17 +19,17 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
 
     uint256 private constant decimalFactor = 10**18;
     uint256 public constant INITIAL_SUPPLY = 1000000000 * decimalFactor;
-    uint256 public AVAILABLE_TOTAL_SUPPLY = 1000000000 * decimalFactor;
-    uint256 public AVAILABLE_PRESALE_SUPPLY = 230000000 * decimalFactor; // 100% Released at Token Distribution (TD)
+    uint256 public availableTotalSupply = 1000000000 * decimalFactor;
+    uint256 public availablePresaleSupply = 230000000 * decimalFactor; // 100% Released at Token Distribution (TD)
     // 33% Released at TD +1 year -> 100% at TD +3 years
-    uint256 public AVAILABLE_FOUNDER_SUPPLY = 150000000 * decimalFactor;
-    uint256 public AVAILABLE_AIRDROP_SUPPLY = 10000000 * decimalFactor; // 100% Released at TD
-    uint256 public AVAILABLE_ADVISOR_SUPPLY = 20000000 * decimalFactor; // 100% Released at TD +7 months
+    uint256 public availableFounderSupply = 150000000 * decimalFactor;
+    uint256 public availableAirdropSupply = 10000000 * decimalFactor; // 100% Released at TD
+    uint256 public availableAdvisorSupply = 20000000 * decimalFactor; // 100% Released at TD +7 months
     // 6.8% Released at TD +100 days -> 100% at TD +4 years
-    uint256 public AVAILABLE_RESERVE_SUPPLY = 513116658 * decimalFactor;
-    uint256 public AVAILABLE_BONUS1_SUPPLY = 39053330 * decimalFactor; // 100% Released at TD +1 year
-    uint256 public AVAILABLE_BONUS2_SUPPLY = 9354408 * decimalFactor; // 100% Released at TD +2 years
-    uint256 public AVAILABLE_BONUS3_SUPPLY = 28475604 * decimalFactor; // 100% Released at TD +3 years
+    uint256 public availableReserveSupply = 513116658 * decimalFactor;
+    uint256 public availableBonus1Supply = 39053330 * decimalFactor; // 100% Released at TD +1 year
+    uint256 public availableBonus2Supply = 9354408 * decimalFactor; // 100% Released at TD +2 years
+    uint256 public availableBonus3Supply = 28475604 * decimalFactor; // 100% Released at TD +3 years
 
     uint256 public grandTotalClaimed = 0;
     uint256 public startTime;
@@ -47,7 +47,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
 
     // Allocation with vesting information
     struct Allocation {
-        uint256 AllocationSupply; // Type of allocation
+        uint256 allocationSupply; // Type of allocation
         uint256 endCliff; // Tokens are locked until
         uint256 endVesting; // This is when the tokens are fully unvested
         uint256 totalAllocated; // Total tokens allocated
@@ -62,7 +62,10 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     mapping(address => bool) public airdrops;
 
     modifier onlyOwnerOrAdmin() {
-        require(msg.sender == owner() || airdropAdmins[msg.sender]);
+        require(
+            msg.sender == owner() || airdropAdmins[msg.sender],
+            "should be owner or admin"
+        );
         _;
     }
 
@@ -115,9 +118,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_PRESALE_SUPPLY = AVAILABLE_PRESALE_SUPPLY.sub(
-            _totalAllocated
-        );
+        availablePresaleSupply = availablePresaleSupply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.PRESALE),
             0,
@@ -126,7 +127,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.PRESALE,
@@ -151,9 +152,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_FOUNDER_SUPPLY = AVAILABLE_FOUNDER_SUPPLY.sub(
-            _totalAllocated
-        );
+        availableFounderSupply = availableFounderSupply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.FOUNDER),
             startTime + 1 * 365 days,
@@ -162,7 +161,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.FOUNDER,
@@ -187,9 +186,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_ADVISOR_SUPPLY = AVAILABLE_ADVISOR_SUPPLY.sub(
-            _totalAllocated
-        );
+        availableAdvisorSupply = availableAdvisorSupply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.ADVISOR),
             startTime + 209 days,
@@ -198,7 +195,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.ADVISOR,
@@ -223,9 +220,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_RESERVE_SUPPLY = AVAILABLE_RESERVE_SUPPLY.sub(
-            _totalAllocated
-        );
+        availableReserveSupply = availableReserveSupply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.RESERVE),
             startTime + 100 days,
@@ -234,7 +229,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.RESERVE,
@@ -259,7 +254,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_BONUS1_SUPPLY = AVAILABLE_BONUS1_SUPPLY.sub(_totalAllocated);
+        availableBonus1Supply = availableBonus1Supply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.BONUS1),
             startTime + 1 * 365 days,
@@ -268,7 +263,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.BONUS1,
@@ -293,7 +288,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_BONUS2_SUPPLY = AVAILABLE_BONUS2_SUPPLY.sub(_totalAllocated);
+        availableBonus2Supply = availableBonus2Supply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.BONUS2),
             startTime + 2 * 365 days,
@@ -302,7 +297,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.BONUS2,
@@ -327,7 +322,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         );
         require(_recipient != address(0), "invalid recipient address");
 
-        AVAILABLE_BONUS3_SUPPLY = AVAILABLE_BONUS3_SUPPLY.sub(_totalAllocated);
+        availableBonus3Supply = availableBonus3Supply.sub(_totalAllocated);
         allocations[_recipient] = Allocation(
             uint8(AllocationType.BONUS3),
             startTime + 3 * 365 days,
@@ -336,7 +331,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             0
         );
 
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(_totalAllocated);
+        availableTotalSupply = availableTotalSupply.sub(_totalAllocated);
         emit LogNewAllocation(
             _recipient,
             AllocationType.BONUS3,
@@ -364,8 +359,8 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         require(block.timestamp >= startTime, "airdrop not started");
         uint256 airdropped;
 
-        AVAILABLE_AIRDROP_SUPPLY = AVAILABLE_AIRDROP_SUPPLY.sub(airdropped);
-        AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(airdropped);
+        availableAirdropSupply = availableAirdropSupply.sub(airdropped);
+        availableTotalSupply = availableTotalSupply.sub(airdropped);
         grandTotalClaimed = grandTotalClaimed.add(airdropped);
 
         for (uint256 i = 0; i < _recipient.length; i++) {
@@ -384,13 +379,18 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      * @dev Transfer a recipients available allocation to their address
      * @param _recipient The address to withdraw tokens for
      */
-    function transferTokens(address _recipient) public {
+    function transferTokens(address _recipient) external nonReentrant {
         require(
             allocations[_recipient].amountClaimed <
-                allocations[_recipient].totalAllocated
+                allocations[_recipient].totalAllocated,
+            "insuffcient amount"
         );
-        require(block.timestamp >= allocations[_recipient].endCliff);
-        require(block.timestamp >= startTime);
+        require(
+            block.timestamp >= allocations[_recipient].endCliff,
+            "still in lock"
+        );
+        require(block.timestamp >= startTime, "not started yet");
+
         uint256 newAmountClaimed;
         if (allocations[_recipient].endVesting > block.timestamp) {
             // Transfer available amount based on vesting schedule and allocation
@@ -406,11 +406,16 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             allocations[_recipient].amountClaimed
         );
         allocations[_recipient].amountClaimed = newAmountClaimed;
-        require(kelpToken.transfer(_recipient, tokensToTransfer));
+
         grandTotalClaimed = grandTotalClaimed.add(tokensToTransfer);
+        require(
+            kelpToken.transfer(_recipient, tokensToTransfer),
+            "kelp transfer failed"
+        );
+
         emit LogKelpClaimed(
             _recipient,
-            allocations[_recipient].AllocationSupply,
+            allocations[_recipient].allocationSupply,
             tokensToTransfer,
             newAmountClaimed,
             grandTotalClaimed
@@ -419,14 +424,16 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
 
     // Returns the amount of KELP allocated
     function grandTotalAllocated() public view returns (uint256) {
-        return INITIAL_SUPPLY - AVAILABLE_TOTAL_SUPPLY;
+        return INITIAL_SUPPLY - availableTotalSupply;
     }
 
     // Allow transfer of accidentally sent ERC20 tokens
     function refundTokens(address _recipient, address _token) public onlyOwner {
-        require(_token != address(kelpToken));
+        require(_token != address(kelpToken), "invalid token address");
+        require(_recipient != address(0), "invalid address");
+
         IERC20 token = IERC20(_token);
         uint256 balance = token.balanceOf(address(this));
-        require(token.transfer(_recipient, balance));
+        require(token.transfer(_recipient, balance), "Kelp transfer failed");
     }
 }
