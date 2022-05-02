@@ -20,7 +20,7 @@ into the underlying contract as the state parameter, messageSender.
 */
 
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Proxyable.sol";
@@ -28,8 +28,6 @@ import "./Proxyable.sol";
 contract Proxy is Ownable {
     Proxyable public target;
     bool public useDELEGATECALL;
-
-    constructor(address _owner) {}
 
     function setTarget(Proxyable _target) external onlyOwner {
         target = _target;
@@ -77,6 +75,58 @@ contract Proxy is Ownable {
     }
 
     fallback() external payable {
+        if (useDELEGATECALL) {
+            assembly {
+                /* Copy call data into free memory region. */
+                let free_ptr := mload(0x40)
+                calldatacopy(free_ptr, 0, calldatasize())
+
+                /* Forward all gas and call data to the target contract. */
+                let result := delegatecall(
+                    gas(),
+                    sload(target.slot),
+                    free_ptr,
+                    calldatasize(),
+                    0,
+                    0
+                )
+                returndatacopy(free_ptr, 0, returndatasize())
+
+                /* Revert if the call failed, otherwise return the result. */
+                if iszero(result) {
+                    revert(free_ptr, returndatasize())
+                }
+                return(free_ptr, returndatasize())
+            }
+        } else {
+            /* Here we are as above, but must send the messageSender explicitly
+             * since we are using CALL rather than DELEGATECALL. */
+            target.setMessageSender(msg.sender);
+            assembly {
+                let free_ptr := mload(0x40)
+                calldatacopy(free_ptr, 0, calldatasize())
+
+                /* We must explicitly forward ether to the underlying contract as well. */
+                let result := call(
+                    gas(),
+                    sload(target.slot),
+                    callvalue(),
+                    free_ptr,
+                    calldatasize(),
+                    0,
+                    0
+                )
+                returndatacopy(free_ptr, 0, returndatasize())
+
+                if iszero(result) {
+                    revert(free_ptr, returndatasize())
+                }
+                return(free_ptr, returndatasize())
+            }
+        }
+    }
+
+    receive() external payable {
         if (useDELEGATECALL) {
             assembly {
                 /* Copy call data into free memory region. */

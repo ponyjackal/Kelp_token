@@ -11,7 +11,7 @@ directly and through the proxy.
 */
 
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Proxy.sol";
@@ -24,7 +24,7 @@ abstract contract Proxyable is Ownable {
     /* The caller of the proxy, passed through to this contract.
      * Note that every function using this member must apply the onlyProxy or
      * optionalProxy modifiers, otherwise their invocations can use stale values. */
-    address messageSender;
+    address public messageSender;
 
     constructor(address payable _proxy) {
         proxy = Proxy(_proxy);
