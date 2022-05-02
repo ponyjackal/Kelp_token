@@ -3,6 +3,7 @@ pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IKelpToken.sol";
 import "./Proxyable.sol";
 
@@ -11,7 +12,7 @@ import "./Proxyable.sol";
  *
  * @dev Distribute purchasers, airdrop, reserve, and founder tokens
  */
-contract KelpAirdrop is Proxyable {
+contract KelpAirdrop is Proxyable, ReentrancyGuard {
     using SafeMath for uint256;
 
     IKelpToken public immutable kelpToken;
@@ -20,10 +21,12 @@ contract KelpAirdrop is Proxyable {
     uint256 public constant INITIAL_SUPPLY = 1000000000 * decimalFactor;
     uint256 public AVAILABLE_TOTAL_SUPPLY = 1000000000 * decimalFactor;
     uint256 public AVAILABLE_PRESALE_SUPPLY = 230000000 * decimalFactor; // 100% Released at Token Distribution (TD)
-    uint256 public AVAILABLE_FOUNDER_SUPPLY = 150000000 * decimalFactor; // 33% Released at TD +1 year -> 100% at TD +3 years
+    // 33% Released at TD +1 year -> 100% at TD +3 years
+    uint256 public AVAILABLE_FOUNDER_SUPPLY = 150000000 * decimalFactor;
     uint256 public AVAILABLE_AIRDROP_SUPPLY = 10000000 * decimalFactor; // 100% Released at TD
     uint256 public AVAILABLE_ADVISOR_SUPPLY = 20000000 * decimalFactor; // 100% Released at TD +7 months
-    uint256 public AVAILABLE_RESERVE_SUPPLY = 513116658 * decimalFactor; // 6.8% Released at TD +100 days -> 100% at TD +4 years
+    // 6.8% Released at TD +100 days -> 100% at TD +4 years
+    uint256 public AVAILABLE_RESERVE_SUPPLY = 513116658 * decimalFactor;
     uint256 public AVAILABLE_BONUS1_SUPPLY = 39053330 * decimalFactor; // 100% Released at TD +1 year
     uint256 public AVAILABLE_BONUS2_SUPPLY = 9354408 * decimalFactor; // 100% Released at TD +2 years
     uint256 public AVAILABLE_BONUS3_SUPPLY = 28475604 * decimalFactor; // 100% Released at TD +3 years
@@ -356,19 +359,25 @@ contract KelpAirdrop is Proxyable {
     function airdropTokens(address[] memory _recipient)
         public
         onlyOwnerOrAdmin
+        nonReentrant
     {
-        require(block.timestamp >= startTime);
+        require(block.timestamp >= startTime, "airdrop not started");
         uint256 airdropped;
-        for (uint256 i = 0; i < _recipient.length; i++) {
-            if (!airdrops[_recipient[i]]) {
-                airdrops[_recipient[i]] = true;
-                require(kelpToken.transfer(_recipient[i], 250 * decimalFactor));
-                airdropped = airdropped.add(250 * decimalFactor);
-            }
-        }
+
         AVAILABLE_AIRDROP_SUPPLY = AVAILABLE_AIRDROP_SUPPLY.sub(airdropped);
         AVAILABLE_TOTAL_SUPPLY = AVAILABLE_TOTAL_SUPPLY.sub(airdropped);
         grandTotalClaimed = grandTotalClaimed.add(airdropped);
+
+        for (uint256 i = 0; i < _recipient.length; i++) {
+            if (!airdrops[_recipient[i]]) {
+                airdrops[_recipient[i]] = true;
+                require(
+                    kelpToken.transfer(_recipient[i], 250 * decimalFactor),
+                    "Kelp transfer failed"
+                );
+                airdropped = airdropped.add(250 * decimalFactor);
+            }
+        }
     }
 
     /**
@@ -415,7 +424,7 @@ contract KelpAirdrop is Proxyable {
 
     // Allow transfer of accidentally sent ERC20 tokens
     function refundTokens(address _recipient, address _token) public onlyOwner {
-        require(_token != address(KELP));
+        require(_token != address(kelpToken));
         IERC20 token = IERC20(_token);
         uint256 balance = token.balanceOf(address(this));
         require(token.transfer(_recipient, balance));
