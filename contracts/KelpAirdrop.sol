@@ -3,8 +3,8 @@ pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./interfaces/IKelpToken.sol";
 import "./Proxyable.sol";
 
 /**
@@ -14,8 +14,9 @@ import "./Proxyable.sol";
  */
 contract KelpAirdrop is Proxyable, ReentrancyGuard {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
-    IKelpToken public immutable kelpToken;
+    IERC20 public immutable kelpToken;
 
     uint256 private constant decimalFactor = 10**18;
     uint256 public constant INITIAL_SUPPLY = 1000000000 * decimalFactor;
@@ -90,7 +91,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     constructor(
         address _proxy,
         uint256 _startTime,
-        IKelpToken _kelpToken
+        IERC20 _kelpToken
     ) Proxyable(payable(_proxy)) {
         require(
             _startTime >= block.timestamp,
@@ -366,10 +367,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         for (uint256 i = 0; i < _recipient.length; i++) {
             if (!airdrops[_recipient[i]]) {
                 airdrops[_recipient[i]] = true;
-                require(
-                    kelpToken.transfer(_recipient[i], 250 * decimalFactor),
-                    "Kelp transfer failed"
-                );
+                kelpToken.safeTransfer(_recipient[i], 250 * decimalFactor);
                 airdropped = airdropped.add(250 * decimalFactor);
             }
         }
@@ -408,10 +406,8 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         allocations[_recipient].amountClaimed = newAmountClaimed;
 
         grandTotalClaimed = grandTotalClaimed.add(tokensToTransfer);
-        require(
-            kelpToken.transfer(_recipient, tokensToTransfer),
-            "kelp transfer failed"
-        );
+
+        kelpToken.safeTransfer(_recipient, tokensToTransfer);
 
         emit LogKelpClaimed(
             _recipient,
@@ -434,6 +430,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
 
         IERC20 token = IERC20(_token);
         uint256 balance = token.balanceOf(address(this));
-        require(token.transfer(_recipient, balance), "Kelp transfer failed");
+        token.safeTransfer(_recipient, balance);
     }
 }
