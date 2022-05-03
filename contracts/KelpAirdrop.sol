@@ -110,7 +110,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setPresaleAllocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -144,7 +144,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setFounderAllocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -178,7 +178,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setAdvisorAllocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -212,7 +212,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setReserveAllocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -246,7 +246,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setBonus1Allocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -280,7 +280,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setBonus2Allocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -314,7 +314,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setBonus3Allocation(address _recipient, uint256 _totalAllocated)
         external
-        onlyOwner
+        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -344,7 +344,10 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     /**
      * @dev Add an airdrop admin
      */
-    function setAirdropAdmin(address _admin, bool _isAdmin) external onlyOwner {
+    function setAirdropAdmin(address _admin, bool _isAdmin)
+        external
+        optionalProxy_onlyOwner
+    {
         airdropAdmins[_admin] = _isAdmin;
     }
 
@@ -377,7 +380,11 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      * @dev Transfer a recipients available allocation to their address
      * @param _recipient The address to withdraw tokens for
      */
-    function transferTokens(address _recipient) external nonReentrant {
+    function transferTokens(address _recipient)
+        external
+        optionalProxy
+        nonReentrant
+    {
         require(
             allocations[_recipient].amountClaimed <
                 allocations[_recipient].totalAllocated,
@@ -424,7 +431,10 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     }
 
     // Allow transfer of accidentally sent ERC20 tokens
-    function refundTokens(address _recipient, address _token) public onlyOwner {
+    function refundTokens(address _recipient, address _token)
+        external
+        optionalProxy_onlyOwner
+    {
         require(_token != address(kelpToken), "invalid token address");
         require(_recipient != address(0), "invalid address");
 

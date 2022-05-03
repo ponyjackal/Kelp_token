@@ -66,7 +66,11 @@ contract KelpToken is IERC20, Proxyable {
      * @param _to The address to transfer to.
      * @param _value The amount to be transferred.
      */
-    function transfer(address _to, uint256 _value) public returns (bool) {
+    function transfer(address _to, uint256 _value)
+        public
+        optionalProxy
+        returns (bool)
+    {
         require(_to != address(0), "invalid address");
         require(_value <= balances[msg.sender], "insufficient balance");
 
@@ -88,7 +92,7 @@ contract KelpToken is IERC20, Proxyable {
         address _from,
         address _to,
         uint256 _value
-    ) public returns (bool) {
+    ) public optionalProxy returns (bool) {
         require(_to != address(0), "invalid address");
         require(_value <= balances[_from], "insufficient balance");
         require(
@@ -114,7 +118,11 @@ contract KelpToken is IERC20, Proxyable {
      * @param _spender The address which will spend the funds.
      * @param _value The amount of tokens to be spent.
      */
-    function approve(address _spender, uint256 _value) public returns (bool) {
+    function approve(address _spender, uint256 _value)
+        public
+        optionalProxy
+        returns (bool)
+    {
         allowed[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
@@ -132,6 +140,7 @@ contract KelpToken is IERC20, Proxyable {
      */
     function increaseApproval(address _spender, uint256 _addedValue)
         public
+        optionalProxy
         returns (bool)
     {
         allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(
@@ -153,6 +162,7 @@ contract KelpToken is IERC20, Proxyable {
      */
     function decreaseApproval(address _spender, uint256 _subtractedValue)
         public
+        optionalProxy
         returns (bool)
     {
         uint256 oldValue = allowed[msg.sender][_spender];
