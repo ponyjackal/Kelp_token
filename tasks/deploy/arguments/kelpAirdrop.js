@@ -1,5 +1,5 @@
 const { readContractAddress } = require("../addresses/utils");
-const { ZERO_ADDRESS } = require("../../../utils/constants");
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const KELP_AIRDROP_PROXY_ADDRESS = readContractAddress("kelpAirdropProxy");
 const KELP_TOKEN_PROXY_ADDRESS =

@@ -9,7 +9,7 @@ console.log("DEPLOY_NETWORK: ", process.env.DEPLOY_NETWORK);
 const network = () => {
   const { DEPLOY_NETWORK } = process.env;
   if (DEPLOY_NETWORK) return DEPLOY_NETWORK;
-  return "goerli";
+  return "bscTestnet";
 };
 
 const writeContractAddress = (contractFileName, address) => {

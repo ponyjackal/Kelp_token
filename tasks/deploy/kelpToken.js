@@ -30,16 +30,29 @@ task("deploy:KelpToken")
 
     writeContractAddress("kelpToken", kelpToken.address);
     console.log("KelpToken deployed to: ", kelpToken.address);
+
+    // set proxy target for KelpToken
+    await proxy.setTarget(kelpToken.address);
   });
 
 task("verify:KelpToken").setAction(async (taskArguments, { run }) => {
   const address = readContractAddress("kelpToken");
+  const proxyAddress = readContractAddress("kelpAirdropProxy");
 
-  await run("verify:verify", {
-    address,
-    constructorArguments: [
-      cArguments.KELP_TOKEN_PROXY_ADDRESS,
-      cArguments.KELP_AIRDROP_PROXY_ADDRESS,
-    ],
-  });
+  try {
+    await run("verify:verify", {
+      proxyAddress,
+      constructorArguments: [],
+    });
+  } catch (err) {}
+
+  try {
+    await run("verify:verify", {
+      address,
+      constructorArguments: [
+        cArguments.KELP_TOKEN_PROXY_ADDRESS,
+        cArguments.KELP_AIRDROP_PROXY_ADDRESS,
+      ],
+    });
+  } catch (err) {}
 });

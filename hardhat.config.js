@@ -29,6 +29,11 @@ if (typeof INFURA_KEY === "undefined") {
   throw new Error(`INFURA_PROJECT_ID must be a defined environment variable`);
 }
 
+const network =
+  process.env.TESTING === "true"
+    ? "hardhat"
+    : process.env.DEPLOY_NETWORK || "bscTestnet";
+
 const infuraUrl = (network) => `https://${network}.infura.io/v3/${INFURA_KEY}`;
 
 const networks = {
@@ -128,7 +133,7 @@ module.exports = {
     runOnCompile: process.env.CONTRACT_SIZER ? true : false,
     disambiguatePaths: false,
   },
-  defaultNetwork: "hardhat",
+  defaultNetwork: network,
   docgen: {
     path: "./docs",
     clear: true,
