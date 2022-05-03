@@ -5,7 +5,7 @@ const {
 } = require("./addresses/utils");
 const cArguments = require("./arguments/kelpToken");
 
-task("deploy:KelpToken")
+task("deploy:KelpAirdrop")
   .addParam("signer", "Index of the signer in the metamask address list")
   .setAction(async (taskArguments, { ethers }) => {
     const accounts = await ethers.getSigners();
@@ -15,24 +15,25 @@ task("deploy:KelpToken")
     const Proxy = await ethers.getContractFactory("Proxy", accounts[index]);
     const proxy = await Proxy.deploy();
     await proxy.deployed();
-    writeContractAddress("kelpTokenProxy", proxy.address);
-    console.log(`Proxy KelpToken deployed to:`, proxy.address);
-    // deploy KelpToken
-    const KelpToken = await ethers.getContractFactory(
-      "KelpToken",
+    writeContractAddress("kelpAirdropProxy", proxy.address);
+    console.log(`Proxy KelpAirdrop deployed to:`, proxy.address);
+    // deploy KelpAirdrop
+    const KelpAirdrop = await ethers.getContractFactory(
+      "KelpAirdrop",
       accounts[index]
     );
-    const kelpToken = await KelpToken.deploy(
-      cArguments.KELP_TOKEN_PROXY_ADDRESS,
-      cArguments.KELP_AIRDROP_PROXY_ADDRESS
+    const kelpAirdrop = await KelpAirdrop.deploy(
+      cArguments.KELP_AIRDROP_PROXY_ADDRESS,
+      cArguments.START_TIME,
+      cArguments.KELP_TOKEN_PROXY_ADDRESS
     );
-    await kelpToken.deployed();
+    await kelpAirdrop.deployed();
 
-    writeContractAddress("kelpToken", kelpToken.address);
-    console.log("KelpToken deployed to: ", kelpToken.address);
+    writeContractAddress("kelpAirdrop", kelpAirdrop.address);
+    console.log("KelpAirdrop deployed to: ", kelpAirdrop.address);
   });
 
-task("verify:KelpToken").setAction(async (taskArguments, { run }) => {
+task("verify:KelpAirdrop").setAction(async (taskArguments, { run }) => {
   const address = readContractAddress("kelpToken");
 
   await run("verify:verify", {
