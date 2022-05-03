@@ -16,7 +16,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public immutable kelpToken;
+    IERC20 public kelpToken;
 
     uint256 private constant decimalFactor = 10**18;
     uint256 public constant INITIAL_SUPPLY = 1000000000 * decimalFactor;
@@ -83,6 +83,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
         uint256 _totalAllocated,
         uint256 _grandTotalClaimed
     );
+    event LogKelpUpdated(address _oldToken, address _newToken);
 
     /**
      * @dev Constructor function - Set the kelp token address
@@ -97,10 +98,22 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
             _startTime >= block.timestamp,
             "Start time can't be in the past"
         );
-        require(address(_kelpToken) != address(0), "invalid Kelp address");
 
         startTime = _startTime;
         kelpToken = _kelpToken;
+    }
+
+    /**
+     * @dev Update Kelp token
+     * @param _kelpToken The Token address of new Kelp
+     */
+    function setKelpToken(address _kelpToken) external optionalProxy_onlyOwner {
+        require(_kelpToken != address(0), "invalid Kelp address");
+
+        address oldKelp = address(kelpToken);
+        kelpToken = IERC20(_kelpToken);
+
+        emit LogKelpUpdated(oldKelp, _kelpToken);
     }
 
     /**
