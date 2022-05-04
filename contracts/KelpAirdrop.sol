@@ -1,22 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./Proxyable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 /**
  * @title KELP token initial distribution
  *
  * @dev Distribute purchasers, airdrop, reserve, and founder tokens
  */
-contract KelpAirdrop is Proxyable, ReentrancyGuard {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+contract KelpAirdrop is
+    Initializable,
+    ReentrancyGuardUpgradeable,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    IERC20 public kelpToken;
+    IERC20Upgradeable public kelpToken;
 
     uint256 private constant decimalFactor = 10**18;
     uint256 public constant INITIAL_SUPPLY = 1000000000 * decimalFactor;
@@ -90,11 +97,10 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      * @dev Constructor function - Set the kelp token address
      * @param _startTime The time when KelpAirdrop goes live
      */
-    constructor(
-        address _proxy,
-        uint256 _startTime,
-        IERC20 _kelpToken
-    ) Proxyable(payable(_proxy)) {
+    function initialize(uint256 _startTime, IERC20Upgradeable _kelpToken)
+        external
+        initializer
+    {
         startTime = _startTime;
         kelpToken = _kelpToken;
     }
@@ -103,11 +109,11 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      * @dev Update Kelp token
      * @param _kelpToken The Token address of new Kelp
      */
-    function setKelpToken(address _kelpToken) external optionalProxy_onlyOwner {
+    function setKelpToken(address _kelpToken) external {
         require(_kelpToken != address(0), "invalid Kelp address");
 
         address oldKelp = address(kelpToken);
-        kelpToken = IERC20(_kelpToken);
+        kelpToken = IERC20Upgradeable(_kelpToken);
 
         emit LogKelpUpdated(oldKelp, _kelpToken);
     }
@@ -116,7 +122,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      * @dev Update Airdrop start time
      * @param _startTime The Token address of new Kelp
      */
-    function setStartTime(uint256 _startTime) external optionalProxy_onlyOwner {
+    function setStartTime(uint256 _startTime) external {
         require(
             _startTime >= block.timestamp,
             "Start time can't be in the past"
@@ -133,7 +139,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setPresaleAllocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -167,7 +172,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setFounderAllocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -201,7 +205,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setAdvisorAllocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -235,7 +238,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setReserveAllocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -269,7 +271,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setBonus1Allocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -303,7 +304,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setBonus2Allocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -337,7 +337,6 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      */
     function setBonus3Allocation(address _recipient, uint256 _totalAllocated)
         external
-        optionalProxy_onlyOwner
     {
         require(_totalAllocated > 0, "invalid totalAllocated");
         require(
@@ -367,10 +366,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     /**
      * @dev Add an airdrop admin
      */
-    function setAirdropAdmin(address _admin, bool _isAdmin)
-        external
-        optionalProxy_onlyOwner
-    {
+    function setAirdropAdmin(address _admin, bool _isAdmin) external {
         airdropAdmins[_admin] = _isAdmin;
     }
 
@@ -403,11 +399,7 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
      * @dev Transfer a recipients available allocation to their address
      * @param _recipient The address to withdraw tokens for
      */
-    function transferTokens(address _recipient)
-        external
-        optionalProxy
-        nonReentrant
-    {
+    function transferTokens(address _recipient) external nonReentrant {
         require(
             allocations[_recipient].amountClaimed <
                 allocations[_recipient].totalAllocated,
@@ -454,14 +446,11 @@ contract KelpAirdrop is Proxyable, ReentrancyGuard {
     }
 
     // Allow transfer of accidentally sent ERC20 tokens
-    function refundTokens(address _recipient, address _token)
-        external
-        optionalProxy_onlyOwner
-    {
+    function refundTokens(address _recipient, address _token) external {
         require(_token != address(kelpToken), "invalid token address");
         require(_recipient != address(0), "invalid address");
 
-        IERC20 token = IERC20(_token);
+        IERC20Upgradeable token = IERC20Upgradeable(_token);
         uint256 balance = token.balanceOf(address(this));
         token.safeTransfer(_recipient, balance);
     }
