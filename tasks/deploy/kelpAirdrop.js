@@ -23,7 +23,7 @@ task("deploy:KelpAirdrop")
       accounts[index]
     );
     const kelpAirdrop = await KelpAirdrop.deploy(
-      cArguments.KELP_AIRDROP_PROXY_ADDRESS,
+      proxy.address,
       cArguments.START_TIME,
       cArguments.KELP_TOKEN_PROXY_ADDRESS
     );
@@ -42,18 +42,23 @@ task("verify:KelpAirdrop").setAction(async (taskArguments, { run }) => {
 
   try {
     await run("verify:verify", {
-      proxyAddress,
+      address: proxyAddress,
       constructorArguments: [],
     });
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
 
   try {
     await run("verify:verify", {
       address,
       constructorArguments: [
+        proxyAddress,
+        cArguments.START_TIME,
         cArguments.KELP_TOKEN_PROXY_ADDRESS,
-        cArguments.KELP_AIRDROP_PROXY_ADDRESS,
       ],
     });
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
 });
