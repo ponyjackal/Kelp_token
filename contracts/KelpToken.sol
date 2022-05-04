@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "./Proxyable.sol";
 
@@ -12,8 +17,14 @@ import "./Proxyable.sol";
  * @dev Implementation of the basic standard token.
  * @dev https://github.com/ethereum/EIPs/issues/20
  */
-contract KelpToken is IERC20, Proxyable {
-    using SafeMath for uint256;
+contract KelpToken is
+    IERC20Upgradeable,
+    Initializable,
+    ReentrancyGuardUpgradeable,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
+    using SafeMathUpgradeable for uint256;
 
     // Kelp Token parameters
     string public name = "Kelp Finance";
@@ -26,12 +37,10 @@ contract KelpToken is IERC20, Proxyable {
     mapping(address => mapping(address => uint256)) internal allowed;
 
     /**
-     * @dev Constructor for Kelp creation
+     * @dev initializer for Kelp creation
      * @dev Assigns the totalSupply to the KelpAirdrop contract
      */
-    constructor(address _proxy, address _kelpAirdrop)
-        Proxyable(payable(_proxy))
-    {
+    function initialize(address _kelpAirdrop) external initializer {
         require(_kelpAirdrop != address(0), "invalid KelpAirdrop address");
         balances[_kelpAirdrop] = totalSupply;
 
@@ -66,11 +75,7 @@ contract KelpToken is IERC20, Proxyable {
      * @param _to The address to transfer to.
      * @param _value The amount to be transferred.
      */
-    function transfer(address _to, uint256 _value)
-        public
-        optionalProxy
-        returns (bool)
-    {
+    function transfer(address _to, uint256 _value) public returns (bool) {
         require(_to != address(0), "invalid address");
         require(_value <= balances[msg.sender], "insufficient balance");
 
@@ -92,7 +97,7 @@ contract KelpToken is IERC20, Proxyable {
         address _from,
         address _to,
         uint256 _value
-    ) public optionalProxy returns (bool) {
+    ) public returns (bool) {
         require(_to != address(0), "invalid address");
         require(_value <= balances[_from], "insufficient balance");
         require(
@@ -118,11 +123,7 @@ contract KelpToken is IERC20, Proxyable {
      * @param _spender The address which will spend the funds.
      * @param _value The amount of tokens to be spent.
      */
-    function approve(address _spender, uint256 _value)
-        public
-        optionalProxy
-        returns (bool)
-    {
+    function approve(address _spender, uint256 _value) public returns (bool) {
         allowed[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
@@ -140,7 +141,6 @@ contract KelpToken is IERC20, Proxyable {
      */
     function increaseApproval(address _spender, uint256 _addedValue)
         public
-        optionalProxy
         returns (bool)
     {
         allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(
@@ -162,7 +162,6 @@ contract KelpToken is IERC20, Proxyable {
      */
     function decreaseApproval(address _spender, uint256 _subtractedValue)
         public
-        optionalProxy
         returns (bool)
     {
         uint256 oldValue = allowed[msg.sender][_spender];
