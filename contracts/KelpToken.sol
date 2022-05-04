@@ -25,8 +25,8 @@ contract KelpToken is
     using SafeMathUpgradeable for uint256;
 
     // Kelp Token parameters
-    string public name = "Kelp Finance";
-    string public symbol = "KELP";
+    string public constant name = "Kelp Finance";
+    string public constant symbol = "KELP";
     uint8 public constant decimals = 18;
     uint256 public constant decimalFactor = 10**uint256(decimals);
     uint256 public constant totalSupply = 1000000000 * decimalFactor;
@@ -40,6 +40,7 @@ contract KelpToken is
      */
     function initialize(address _kelpAirdrop) external initializer {
         require(_kelpAirdrop != address(0), "invalid KelpAirdrop address");
+
         balances[_kelpAirdrop] = totalSupply;
 
         emit Transfer(address(0), _kelpAirdrop, totalSupply);

@@ -4,6 +4,7 @@ require("solidity-coverage");
 require("hardhat-contract-sizer");
 require("hardhat-gas-reporter");
 require("hardhat-docgen");
+require("@openzeppelin/hardhat-upgrades");
 
 require("./tasks");
 
@@ -197,7 +198,7 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.8.12",
+        version: "0.8.0",
         settings: {
           metadata: {
             // Not including the metadata hash

@@ -1,11 +1,9 @@
 const { readContractAddress } = require("../addresses/utils");
 
-const KELP_AIRDROP_PROXY_ADDRESS = readContractAddress("kelpAirdropProxy");
-const KELP_TOKEN_PROXY_ADDRESS = readContractAddress("kelpTokenProxy");
+const KELP_AIRDROP = readContractAddress("kelpAirdrop");
 
 const values = {
-  KELP_AIRDROP_PROXY_ADDRESS,
-  KELP_TOKEN_PROXY_ADDRESS,
+  KELP_AIRDROP,
 };
 
 module.exports = values;

@@ -7,56 +7,66 @@ const cArguments = require("./arguments/kelpAirdrop");
 
 task("deploy:KelpAirdrop")
   .addParam("signer", "Index of the signer in the metamask address list")
-  .setAction(async (taskArguments, { ethers }) => {
+  .setAction(async (taskArguments, { ethers, upgrades }) => {
     const accounts = await ethers.getSigners();
     const index = Number(taskArguments.signer);
 
-    // deploy proxy first
-    const Proxy = await ethers.getContractFactory("Proxy", accounts[index]);
-    const proxy = await Proxy.deploy();
-    await proxy.deployed();
-    writeContractAddress("kelpAirdropProxy", proxy.address);
-    console.log(`Proxy KelpAirdrop deployed to:`, proxy.address);
     // deploy KelpAirdrop
     const KelpAirdrop = await ethers.getContractFactory(
       "KelpAirdrop",
       accounts[index]
     );
-    const kelpAirdrop = await KelpAirdrop.deploy(
-      proxy.address,
-      cArguments.START_TIME,
-      cArguments.KELP_TOKEN_PROXY_ADDRESS
+
+    const kelpAirdropProxy = await upgrades.deployProxy(KelpAirdrop, [
+      cArguments.KELP_TOKEN,
+    ]);
+
+    await KelpAirdrop.deployed();
+
+    writeContractAddress("KelpAirdrop", kelpAirdropProxy.address);
+    console.log("KelpAirdrop proxy deployed to: ", kelpAirdropProxy.address);
+
+    const impl = await upgrades.erc1967.getImplementationAddress(
+      kelpAirdropProxy.address
     );
-    await kelpAirdrop.deployed();
+    console.log("Implementation :", impl);
+  });
 
-    writeContractAddress("kelpAirdrop", kelpAirdrop.address);
-    console.log("KelpAirdrop deployed to: ", kelpAirdrop.address);
+task("upgrade:KelpAirdrop")
+  .addParam("signer", "Index of the signer in the metamask address list")
+  .setAction(async function (taskArguments, { ethers, upgrades }) {
+    console.log("--- start upgrading the KelpAirdrop Contract ---");
+    const accounts = await ethers.getSigners();
+    const index = Number(taskArguments.signer);
 
-    // set proxy target for KelpAirdrop
-    await proxy.setTarget(kelpAirdrop.address);
+    // Use accounts[1] as the signer for the real roll
+    const KelpAirdrop = await ethers.getContractFactory(
+      "KelpAirdrop",
+      accounts[index]
+    );
+
+    const kelpAirdropAddress = readContractAddress("kelpAirdrop");
+
+    const upgraded = await upgrades.upgradeProxy(
+      kelpAirdropAddress,
+      KelpAirdrop
+    );
+
+    console.log("KelpAirdrop upgraded to: ", upgraded.address);
+
+    const impl = await upgrades.erc1967.getImplementationAddress(
+      upgraded.address
+    );
+    console.log("Implementation :", impl);
   });
 
 task("verify:KelpAirdrop").setAction(async (taskArguments, { run }) => {
   const address = readContractAddress("kelpAirdrop");
-  const proxyAddress = readContractAddress("kelpAirdropProxy");
-
-  try {
-    await run("verify:verify", {
-      address: proxyAddress,
-      constructorArguments: [],
-    });
-  } catch (err) {
-    console.log(err);
-  }
 
   try {
     await run("verify:verify", {
       address,
-      constructorArguments: [
-        proxyAddress,
-        cArguments.START_TIME,
-        cArguments.KELP_TOKEN_PROXY_ADDRESS,
-      ],
+      constructorArguments: [],
     });
   } catch (err) {
     console.log(err);
