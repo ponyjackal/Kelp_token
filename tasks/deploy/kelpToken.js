@@ -18,18 +18,19 @@ task("deploy:KelpToken")
     );
 
     const kelpTokenProxy = await upgrades.deployProxy(KelpToken, [
-      cArguments.KELP_AIRDROP,
+      cArguments.KELP_AIRDROP_PROXY,
     ]);
 
     await kelpTokenProxy.deployed();
 
-    writeContractAddress("KelpToken", kelpTokenProxy.address);
+    writeContractAddress("kelpTokenProxy", kelpTokenProxy.address);
     console.log("KelpToken proxy deployed to: ", kelpTokenProxy.address);
 
-    const impl = await upgrades.erc1967.getImplementationAddress(
+    const kelpToken = await upgrades.erc1967.getImplementationAddress(
       kelpTokenProxy.address
     );
-    console.log("Implementation :", impl);
+    writeContractAddress("kelpToken", kelpToken);
+    console.log("kelpToken deployed to :", kelpToken);
   });
 
 task("upgrade:KelpToken")
@@ -45,16 +46,20 @@ task("upgrade:KelpToken")
       accounts[index]
     );
 
-    const kelpTokenAddress = readContractAddress("kelpToken");
+    const kelpTokenProxyAddress = readContractAddress("kelpTokenProxy");
 
-    const upgraded = await upgrades.upgradeProxy(kelpTokenAddress, KelpToken);
+    const upgraded = await upgrades.upgradeProxy(
+      kelpTokenProxyAddress,
+      KelpToken
+    );
 
     console.log("KelpToken upgraded to: ", upgraded.address);
 
-    const impl = await upgrades.erc1967.getImplementationAddress(
+    const kelpToken = await upgrades.erc1967.getImplementationAddress(
       upgraded.address
     );
-    console.log("Implementation :", impl);
+    writeContractAddress("kelpToken", kelpToken);
+    console.log("kelpToken deployed to :", kelpToken);
   });
 
 task("verify:KelpToken").setAction(async (taskArguments, { run }) => {
