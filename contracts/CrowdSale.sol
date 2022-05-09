@@ -232,6 +232,54 @@ contract CrowdSale is
     }
 
     // -----------------------------------------
+    // Crowdsale external getters
+    // -----------------------------------------
+    /**
+     * @dev return token sale rate
+     * @param _type The type of sale
+     */
+    function getRate(uint256 _type) external view returns (uint256) {
+        require(_type < sales.length, "invalid type");
+        return sales[_type].rate;
+    }
+
+    /**
+     * @dev return token sale limit per account
+     * @param _type The type of sale
+     */
+    function getStartTime(uint256 _type) external view returns (uint256) {
+        require(_type < sales.length, "invalid type");
+        return sales[_type].startTime;
+    }
+
+    /**
+     * @dev return token sale limit per account
+     * @param _type The type of sale
+     */
+    function getLimitPerAccount(uint256 _type) external view returns (uint256) {
+        require(_type < sales.length, "invalid type");
+        return sales[_type].limitPerAccount;
+    }
+
+    /**
+     * @dev return token sale limit per account
+     * @param _type The type of sale
+     */
+    function getTotalLimit(uint256 _type) external view returns (uint256) {
+        require(_type < sales.length, "invalid type");
+        return sales[_type].totalLimit;
+    }
+
+    /**
+     * @dev return token sale pause status
+     * @param _type The type of sale
+     */
+    function isPaused(uint256 _type) external view returns (bool) {
+        require(_type < sales.length, "invalid type");
+        return sales[_type].paused;
+    }
+
+    // -----------------------------------------
     // Crowdsale external interface
     // -----------------------------------------
 
