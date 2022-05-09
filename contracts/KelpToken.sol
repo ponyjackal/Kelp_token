@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 /**
@@ -19,8 +18,7 @@ contract KelpToken is
     IERC20Upgradeable,
     Initializable,
     ReentrancyGuardUpgradeable,
-    OwnableUpgradeable,
-    PausableUpgradeable
+    OwnableUpgradeable
 {
     using SafeMathUpgradeable for uint256;
 
@@ -40,6 +38,10 @@ contract KelpToken is
      */
     function initialize(address _kelpAirdrop) external initializer {
         require(_kelpAirdrop != address(0), "invalid KelpAirdrop address");
+
+        __Context_init();
+        __Ownable_init();
+        __ReentrancyGuard_init();
 
         balances[_kelpAirdrop] = totalSupply;
 

@@ -101,6 +101,11 @@ contract KelpAirdrop is
         external
         initializer
     {
+        __Context_init();
+        __Ownable_init();
+        __ReentrancyGuard_init();
+        __Pausable_init();
+
         startTime = _startTime;
         kelpToken = _kelpToken;
     }
