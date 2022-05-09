@@ -20,7 +20,7 @@ contract CrowdSale is
     // The token being sold
     IERC20Upgradeable public kelpToken;
     // Address where funds are collected
-    address public wallet;
+    address payable public wallet;
     // Amount of wei raised
     uint256 public weiRaised;
 
@@ -253,7 +253,7 @@ contract CrowdSale is
         );
 
         // calculate sale token amount to be created
-        uint256 tokens = _getTokenAmount(weiAmount);
+        uint256 tokens = _getTokenAmount(weiAmount, _type);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
         require(
@@ -274,6 +274,8 @@ contract CrowdSale is
         // deliver tokens
         _deliverTokens(_beneficiary, tokens);
         emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens);
+
+        _forwardFunds();
     }
 
     // -----------------------------------------
@@ -294,25 +296,14 @@ contract CrowdSale is
     /**
      * @dev get private sale token amount
      * @param _weiAmount Amount of wei to purchase
+     * @param _type The type of token sale
      */
-    function _getTokenAmount(uint256 _weiAmount)
+    function _getTokenAmount(uint256 _weiAmount, uint256 _type)
         internal
-        pure
+        view
         returns (uint256)
     {
-        return _weiAmount.mul(PRIVATE_SALE_PRICE);
-    }
-
-    /**
-     * @dev get pre sale token amount
-     * @param _weiAmount Amount of wei to purchase
-     */
-    function _getPreSaleTokenAmount(uint256 _weiAmount)
-        internal
-        pure
-        returns (uint256)
-    {
-        return _weiAmount.mul(PRE_SALE_PRICE);
+        return _weiAmount.mul(sales[_type].rate);
     }
 
     /**
@@ -326,5 +317,12 @@ contract CrowdSale is
         }
 
         return sales.length;
+    }
+
+    /**
+     * @dev Determines how ETH is stored/forwarded on purchases.
+     */
+    function _forwardFunds() internal {
+        wallet.transfer(msg.value);
     }
 }
