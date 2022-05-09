@@ -49,6 +49,16 @@
       "address": "0x3e799dC1c2c79EC554c50Ea6Ebd2Ce79c7df19F2",
       "txHash": "0x799412ab5acfef5794c2333130b92a39ae2642866208f6e1759ca5abba2bc876",
       "kind": "transparent"
+    },
+    {
+      "address": "0x967950874D2B8D7d251F578AfF46fE1F515e943a",
+      "txHash": "0xfb0225781778144e35dff147d0932d09a27a34d971a3e011deec3d737bda81fb",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x087aa879D062797693F917ADcFB652e8ccc5A95d",
+      "txHash": "0xd793a540b282fb18fbd90872e95c17543158206a92018071109203e33e20075f",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -731,6 +741,221 @@
     "dd8546f8ec33d253d37dba6569a918f54c0a7d57df19d5c194a9fc0843369ba9": {
       "address": "0x9Dce983584792C9Bd89435241495021BdB0AE534",
       "txHash": "0x2a0aef496ea37ded58361bcef2654cf46063f3d7c5441e54a19abb09c6ed2a1f",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:67"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\ReentrancyGuardUpgradeable.sol:74"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\PausableUpgradeable.sol:102"
+          },
+          {
+            "label": "kelpToken",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_contract(IERC20Upgradeable)513",
+            "contract": "CrowdSale",
+            "src": "contracts\\CrowdSale.sol:21"
+          },
+          {
+            "label": "wallet",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_address_payable",
+            "contract": "CrowdSale",
+            "src": "contracts\\CrowdSale.sol:23"
+          },
+          {
+            "label": "weiRaised",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_uint256",
+            "contract": "CrowdSale",
+            "src": "contracts\\CrowdSale.sol:25"
+          },
+          {
+            "label": "sales",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_array(t_struct(SaleInfo)1376_storage)dyn_storage",
+            "contract": "CrowdSale",
+            "src": "contracts\\CrowdSale.sol:39"
+          },
+          {
+            "label": "purchases",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "CrowdSale",
+            "src": "contracts\\CrowdSale.sol:40"
+          },
+          {
+            "label": "totalSales",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "contract": "CrowdSale",
+            "src": "contracts\\CrowdSale.sol:41"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(SaleInfo)1376_storage)dyn_storage": {
+            "label": "struct CrowdSale.SaleInfo[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IERC20Upgradeable)513": {
+            "label": "contract IERC20Upgradeable",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SaleInfo)1376_storage": {
+            "label": "struct CrowdSale.SaleInfo",
+            "members": [
+              {
+                "label": "rate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "startTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "limitPerAccount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "totalLimit",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "39934cff04c98bf66b76cce36be394ff4564e129de9fed8bc9f5dc856b71f638": {
+      "address": "0x94b9eC27dE2318Ce7C5B266FA2Efde298B42978E",
+      "txHash": "0x248f5a59baf85466c392e727edda733c71f88de15c5fa3664da093cf2f6a061b",
       "layout": {
         "storage": [
           {

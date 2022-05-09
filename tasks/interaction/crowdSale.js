@@ -1,5 +1,4 @@
 const { task } = require("hardhat/config");
-const { ethers } = require("ethers");
 const { readContractAddress } = require("../deploy/addresses/utils");
 const { readValue } = require("./values/utils");
 
@@ -9,7 +8,7 @@ task("interaction:CrowdSale-initialize")
     const accounts = await ethers.getSigners();
     const index = Number(taskArguments.signer);
 
-    const crowdSaleAddress = readContractAddress("crowdSale");
+    const crowdSaleProxyAddress = readContractAddress("crowdSaleProxy");
     const kelpTokenProxyAddress = readContractAddress("kelpTokenProxy");
     const crowdSaleWalletAddress = readContractAddress("crowdSaleWallet");
 
@@ -17,7 +16,7 @@ task("interaction:CrowdSale-initialize")
       "CrowdSale",
       accounts[index]
     );
-    const crowdSale = await CrowdSale.attach(crowdSaleAddress);
+    const crowdSale = await CrowdSale.attach(crowdSaleProxyAddress);
 
     try {
       await crowdSale.initialize(kelpTokenProxyAddress, crowdSaleWalletAddress);
@@ -33,7 +32,7 @@ task("interaction:CrowdSale-addPrivateSaleInfo")
     const accounts = await ethers.getSigners();
     const index = Number(taskArguments.signer);
 
-    const crowdSaleAddress = readContractAddress("crowdSale");
+    const crowdSaleProxyAddress = readContractAddress("crowdSaleProxy");
 
     const rate = readValue("privateSaleInfo", "rate");
     const startTime = readValue("privateSaleInfo", "startTime");
@@ -45,7 +44,7 @@ task("interaction:CrowdSale-addPrivateSaleInfo")
       "CrowdSale",
       accounts[index]
     );
-    const crowdSale = await CrowdSale.attach(crowdSaleAddress);
+    const crowdSale = await CrowdSale.attach(crowdSaleProxyAddress);
 
     try {
       await crowdSale.addSaleInfo(
@@ -67,7 +66,7 @@ task("interaction:CrowdSale-addPreSaleInfo")
     const accounts = await ethers.getSigners();
     const index = Number(taskArguments.signer);
 
-    const crowdSaleAddress = readContractAddress("crowdSale");
+    const crowdSaleProxyAddress = readContractAddress("crowdSaleProxy");
 
     const rate = readValue("preSaleInfo", "rate");
     const startTime = readValue("preSaleInfo", "startTime");
@@ -79,7 +78,7 @@ task("interaction:CrowdSale-addPreSaleInfo")
       "CrowdSale",
       accounts[index]
     );
-    const crowdSale = await CrowdSale.attach(crowdSaleAddress);
+    const crowdSale = await CrowdSale.attach(crowdSaleProxyAddress);
 
     try {
       await crowdSale.addSaleInfo(
