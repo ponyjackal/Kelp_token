@@ -89,6 +89,12 @@ contract CrowdSale is
         uint256 totalLimit,
         bool paused
     );
+    /**
+     * Event for updating wallet address
+     * @param oldWallet New wallet address
+     * @param newWallet New wallet address
+     */
+    event WalletUpdated(address oldWallet, address newWallet);
 
     // -----------------------------------------
     // Crowdsale Initializer
@@ -98,13 +104,20 @@ contract CrowdSale is
      * @dev Initializer function
      * @param _kelpToken The Kelp token
      */
-    function initialize(IERC20Upgradeable _kelpToken) external initializer {
+    function initialize(IERC20Upgradeable _kelpToken, address payable _wallet)
+        external
+        initializer
+    {
         __Context_init();
         __Ownable_init();
         __ReentrancyGuard_init();
         __Pausable_init();
 
+        require(address(_kelpToken) != address(0), "invalid kelp address");
+        require(_wallet != address(0), "invalid kelp address");
+
         kelpToken = _kelpToken;
+        wallet = _wallet;
     }
 
     // -----------------------------------------
@@ -191,6 +204,18 @@ contract CrowdSale is
             _totalLimit,
             _paused
         );
+    }
+
+    /**
+     * @dev update wallet address
+     * @param _wallet The type of sale
+     */
+    function updateWallet(address payable _wallet) external onlyOwner {
+        require(_wallet != address(0), "invalid address");
+        address oldWallet = wallet;
+        wallet = _wallet;
+
+        emit WalletUpdated(oldWallet, wallet);
     }
 
     /**
