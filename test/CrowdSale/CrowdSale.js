@@ -1,6 +1,8 @@
 const { artifacts, ethers, waffle } = require("hardhat");
 const { expect } = require("chai");
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 const deployCrowdSale = async (signer) => {
   const ARGS = [];
 
@@ -48,18 +50,103 @@ describe("CrowdSale", function () {
     );
   });
 
-  it("should return the airdrop address", async function () {
-    // airdrop address where transfers tokens from
-    const airdrop = await this.crowdSale.airdrop();
+  describe("Airdrop", async function () {
+    it("should return the airdrop address", async function () {
+      // airdrop address where transfers tokens from
+      const airdrop = await this.crowdSale.airdrop();
 
-    expect(airdrop).to.equal(this.signers.airdrop.address);
+      expect(airdrop).to.equal(this.signers.airdrop.address);
+    });
+
+    it("should update airdrop address", async function () {
+      await this.crowdSale.updateAirdrop(this.signers.andy.address);
+      const airdrop = await this.crowdSale.airdrop();
+
+      expect(airdrop).to.equal(this.signers.andy.address);
+    });
+
+    it("should revert if airdrop address is invalid", async function () {
+      const tx = this.crowdSale.updateAirdrop(ZERO_ADDRESS);
+
+      await expect(tx).to.be.revertedWith("invalid address");
+    });
+
+    it("should emit AirdropUpdated event", async function () {
+      // reset wallet address
+      await this.crowdSale.updateAirdrop(this.signers.airdrop.address);
+      // update wallet address
+      const tx = this.crowdSale.updateAirdrop(this.signers.andy.address);
+
+      await expect(tx)
+        .to.be.emit(this.crowdSale, "AirdropUpdated")
+        .withArgs(this.signers.airdrop.address, this.signers.andy.address);
+    });
   });
 
-  it("should return the kelp token address", async function () {
-    // kelp token address
-    const kelpToken = await this.crowdSale.kelpToken();
+  describe("Wallet", async function () {
+    it("should return the wallet address", async function () {
+      // wallet address where funds go into
+      const fundWallet = await this.crowdSale.wallet();
 
-    expect(kelpToken).to.equal(this.kelpToken.address);
+      expect(fundWallet).to.equal(this.signers.fundWallet.address);
+    });
+
+    it("should update wallet", async function () {
+      await this.crowdSale.updateWallet(this.signers.andy.address);
+      const fundWallet = await this.crowdSale.wallet();
+
+      expect(fundWallet).to.equal(this.signers.andy.address);
+    });
+
+    it("should revert if wallet address is invalid", async function () {
+      const tx = this.crowdSale.updateWallet(ZERO_ADDRESS);
+
+      await expect(tx).to.be.revertedWith("invalid address");
+    });
+
+    it("should emit WalletUpdated event", async function () {
+      // reset wallet address
+      await this.crowdSale.updateWallet(this.signers.fundWallet.address);
+      // update wallet address
+      const tx = this.crowdSale.updateWallet(this.signers.andy.address);
+
+      await expect(tx)
+        .to.be.emit(this.crowdSale, "WalletUpdated")
+        .withArgs(this.signers.fundWallet.address, this.signers.andy.address);
+    });
+  });
+
+  describe("KelpToken", async function () {
+    it("should return the kelp token address", async function () {
+      // kelp token address
+      const kelpToken = await this.crowdSale.kelpToken();
+
+      expect(kelpToken).to.equal(this.kelpToken.address);
+    });
+
+    it("should update kelp token address", async function () {
+      await this.crowdSale.updateKelpToken(this.signers.andy.address);
+      const kelpToken = await this.crowdSale.kelpToken();
+
+      expect(kelpToken).to.equal(this.signers.andy.address);
+    });
+
+    it("should revert if kelp token address is invalid", async function () {
+      const tx = this.crowdSale.updateKelpToken(ZERO_ADDRESS);
+
+      await expect(tx).to.be.revertedWith("invalid address");
+    });
+
+    it("should emit KelpTokenUpdated event", async function () {
+      // reset kelp token address
+      await this.crowdSale.updateKelpToken(this.kelpToken.address);
+      // update kelp token address
+      const tx = this.crowdSale.updateKelpToken(this.signers.andy.address);
+
+      await expect(tx)
+        .to.be.emit(this.crowdSale, "KelpTokenUpdated")
+        .withArgs(this.kelpToken.address, this.signers.andy.address);
+    });
   });
 
   describe("addSaleInfo", async function () {
