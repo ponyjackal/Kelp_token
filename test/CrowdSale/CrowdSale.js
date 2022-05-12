@@ -15,7 +15,7 @@ const deployKelpToken = async (signer) => {
   return await waffle.deployContract(signer, kelpTokenArtifact, ARGS);
 };
 
-describe("Unit tests", function () {
+describe("CrowdSale", function () {
   before(async function () {
     this.signers = {};
 
@@ -62,7 +62,7 @@ describe("Unit tests", function () {
     expect(kelpToken).to.equal(this.kelpToken.address);
   });
 
-  describe("saleInfo", async function () {
+  describe("addSaleInfo", async function () {
     it("should return the sales info", async function () {
       const tenSec = 10;
 
@@ -218,9 +218,196 @@ describe("Unit tests", function () {
         );
     });
   });
-});
 
-module.exports = {
-  deployKelpToken,
-  deployCrowdSale,
-};
+  describe("updateSaleInfo", async function () {
+    beforeEach(async function () {
+      const tenSec = 10;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + tenSec,
+        limitPerAccount: "0",
+        totalLimit: "2000000000",
+        paused: false,
+      };
+      // add sales info
+      await this.crowdSale.addSaleInfo(
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+    });
+
+    it("should return the updated saleInfo", async function () {
+      const tenSec = 10;
+      const type = 0;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + tenSec,
+        limitPerAccount: "0",
+        totalLimit: "2000000000",
+        paused: false,
+      };
+      // update sales info
+      await this.crowdSale.updateSaleInfo(
+        type,
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+      // rate
+      const rate = await this.crowdSale.getRate(type);
+      expect(rate).to.equal(ethers.utils.parseEther(saleInfo.rate));
+      // startTime
+      const startTime = await this.crowdSale.getStartTime(type);
+      expect(startTime).to.equal(saleInfo.startTime);
+      // limitPerAccount
+      const limitPerAccount = await this.crowdSale.getLimitPerAccount(type);
+      expect(limitPerAccount).to.equal(
+        ethers.utils.parseEther(saleInfo.limitPerAccount)
+      );
+      // totalLimit
+      const totalLimit = await this.crowdSale.getTotalLimit(type);
+      expect(totalLimit).to.equal(ethers.utils.parseEther(saleInfo.totalLimit));
+      // paused
+      const paused = await this.crowdSale.isPaused(type);
+      expect(paused).to.equal(saleInfo.paused);
+    });
+
+    it("should revert if rate is invalid", async function () {
+      const tenSec = 10;
+      const type = 0;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0",
+        startTime: currentTimeStamp + tenSec,
+        limitPerAccount: "0",
+        totalLimit: "2000000000",
+        paused: false,
+      };
+      // update sales info
+      const transaction = this.crowdSale.updateSaleInfo(
+        type,
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+      // check revert message
+      await expect(transaction).to.be.revertedWith("invalid rate");
+    });
+
+    it("should revert if startTime is in the past", async function () {
+      const tenSec = 10;
+      const type = 0;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp - tenSec,
+        limitPerAccount: "0",
+        totalLimit: "2000000000",
+        paused: false,
+      };
+      // update sales info
+      const transaction = this.crowdSale.updateSaleInfo(
+        type,
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+      // check revert message
+      await expect(transaction).to.be.revertedWith(
+        "can't set startTime in the past"
+      );
+    });
+
+    it("should revert if total limit is invalid", async function () {
+      const tenSec = 10;
+      const type = 0;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + tenSec,
+        limitPerAccount: "0",
+        totalLimit: "0",
+        paused: false,
+      };
+      // upadte sales info
+      const transaction = this.crowdSale.updateSaleInfo(
+        type,
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+      // check revert message
+      await expect(transaction).to.be.revertedWith("invalid total limit");
+    });
+
+    it("should emit SaleUpdated event", async function () {
+      const tenSec = 10;
+      type = 0;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + tenSec,
+        limitPerAccount: "0",
+        totalLimit: "2000000000",
+        paused: false,
+      };
+      // add sales info
+      const transaction = this.crowdSale.updateSaleInfo(
+        type,
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+      // check revert message
+      await expect(transaction)
+        .to.be.emit(this.crowdSale, "SaleUpdated")
+        .withArgs(
+          type,
+          ethers.utils.parseEther(saleInfo.rate),
+          saleInfo.startTime,
+          ethers.utils.parseEther(saleInfo.limitPerAccount),
+          ethers.utils.parseEther(saleInfo.totalLimit),
+          saleInfo.paused
+        );
+    });
+  });
+});
