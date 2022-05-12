@@ -125,6 +125,8 @@ contract KelpToken is
      * @param _value The amount of tokens to be spent.
      */
     function approve(address _spender, uint256 _value) public returns (bool) {
+        require(_spender != address(0), "invalid address");
+
         allowed[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
@@ -144,6 +146,8 @@ contract KelpToken is
         public
         returns (bool)
     {
+        require(_spender != address(0), "invalid address");
+
         allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(
             _addedValue
         );

@@ -21,9 +21,10 @@ contract CrowdSale is
     IERC20Upgradeable public kelpToken;
     // Address where funds are collected
     address payable public wallet;
+    // Airdrop address where transfers tokens from
+    address public airdrop;
     // Amount of wei raised
     uint256 public weiRaised;
-
     struct SaleInfo {
         uint256 rate;
         uint256 startTime;
@@ -91,10 +92,22 @@ contract CrowdSale is
     );
     /**
      * Event for updating wallet address
-     * @param oldWallet New wallet address
+     * @param oldWallet Old wallet address
      * @param newWallet New wallet address
      */
     event WalletUpdated(address oldWallet, address newWallet);
+    /**
+     * Event for updating wallet address
+     * @param oldKelpToken Old wallet address
+     * @param newKelpToken New wallet address
+     */
+    event KelpTokenUpdated(address oldKelpToken, address newKelpToken);
+    /**
+     * Event for updating airdrop address
+     * @param oldAirdrop Old airdrop address
+     * @param newAirdrop New airdrop address
+     */
+    event AirdropUpdated(address oldAirdrop, address newAirdrop);
 
     // -----------------------------------------
     // Crowdsale Initializer
@@ -104,10 +117,11 @@ contract CrowdSale is
      * @dev Initializer function
      * @param _kelpToken The Kelp token
      */
-    function initialize(IERC20Upgradeable _kelpToken, address payable _wallet)
-        external
-        initializer
-    {
+    function initialize(
+        IERC20Upgradeable _kelpToken,
+        address payable _wallet,
+        address _airdrop
+    ) external initializer {
         __Context_init();
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -115,9 +129,11 @@ contract CrowdSale is
 
         require(address(_kelpToken) != address(0), "invalid kelp address");
         require(_wallet != address(0), "invalid kelp address");
+        require(_airdrop != address(0), "invalid airdrop address");
 
         kelpToken = _kelpToken;
         wallet = _wallet;
+        airdrop = _airdrop;
     }
 
     // -----------------------------------------
@@ -216,6 +232,32 @@ contract CrowdSale is
         wallet = _wallet;
 
         emit WalletUpdated(oldWallet, wallet);
+    }
+
+    /**
+     * @dev update kelp token address
+     * @param _kelpToken The kelp token address
+     */
+    function updateKelpToken(IERC20Upgradeable _kelpToken) external onlyOwner {
+        require(address(_kelpToken) != address(0), "invalid address");
+
+        IERC20Upgradeable oldToken = kelpToken;
+        kelpToken = _kelpToken;
+
+        emit KelpTokenUpdated(address(oldToken), address(kelpToken));
+    }
+
+    /**
+     * @dev update airdrop address
+     * @param _airdrop The kelp token address
+     */
+    function updateAirdrop(address _airdrop) external onlyOwner {
+        require(address(_airdrop) != address(0), "invalid address");
+
+        address oldAirdrop = airdrop;
+        airdrop = _airdrop;
+
+        emit AirdropUpdated(oldAirdrop, airdrop);
     }
 
     /**
@@ -338,7 +380,7 @@ contract CrowdSale is
             tokens
         );
         require(
-            sales[_type].limitPerAccount != 0 &&
+            sales[_type].limitPerAccount == 0 ||
                 purchases[_type][_beneficiary] <= sales[_type].limitPerAccount,
             "Purchase limit exceeds"
         );
@@ -363,7 +405,7 @@ contract CrowdSale is
     function _deliverTokens(address _beneficiary, uint256 _tokenAmount)
         internal
     {
-        kelpToken.transfer(_beneficiary, _tokenAmount);
+        kelpToken.transferFrom(airdrop, _beneficiary, _tokenAmount);
     }
 
     /**

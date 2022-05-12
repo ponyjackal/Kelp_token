@@ -8,14 +8,14 @@ task("interaction:KelpToken-initialize")
     const accounts = await ethers.getSigners();
     const index = Number(taskArguments.signer);
 
-    const kelpTokenAddress = readContractAddress("kelpToken");
+    const kelpTokenProxyAddress = readContractAddress("kelpTokenProxy");
     const kelpAirdropProxyAddress = readContractAddress("kelpAirdropProxy");
 
     const KelpToken = await ethers.getContractFactory(
       "KelpToken",
       accounts[index]
     );
-    const kelpToken = await KelpToken.attach(kelpTokenAddress);
+    const kelpToken = await KelpToken.attach(kelpTokenProxyAddress);
 
     try {
       await kelpToken.initialize(kelpAirdropProxyAddress);
