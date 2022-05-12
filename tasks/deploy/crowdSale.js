@@ -20,6 +20,7 @@ task("deploy:CrowdSale")
     const crowdSaleProxy = await upgrades.deployProxy(CrowdSale, [
       cArguments.KELP_TOKEN_PROXY,
       cArguments.CROWD_SALE_WALLET,
+      cArguments.KELP_AIRDROP_PROXY,
     ]);
 
     await crowdSaleProxy.deployed();
