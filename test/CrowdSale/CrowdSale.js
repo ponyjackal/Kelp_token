@@ -497,4 +497,46 @@ describe("CrowdSale", function () {
         );
     });
   });
+
+  describe("Pause Sale", async function () {
+    beforeEach(async function () {
+      // add saleInfo
+      const tenSec = 10;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + tenSec,
+        limitPerAccount: "0",
+        totalLimit: "2000000000",
+        paused: false,
+      };
+      // add sales info
+      await this.crowdSale.addSaleInfo(
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+    });
+
+    it("should pause the sale", async function () {
+      // pause the sale
+      await this.crowdSale.pauseSale(0, true);
+      // paused
+      const paused = await this.crowdSale.isPaused(0);
+      expect(paused).to.equal(true);
+    });
+
+    it("should revert if type is invalid", async function () {
+      // pause the sale
+      const tx = this.crowdSale.pauseSale(1000000, true);
+      // check revert message
+      await expect(tx).to.be.revertedWith("invalid type");
+    });
+  });
 });
