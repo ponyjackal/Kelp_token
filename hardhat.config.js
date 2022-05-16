@@ -169,6 +169,10 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: networks["hardhat"].chainId,
+      // forking
+      forking: {
+        url: process.env.BSC_MAINNET_RPC_URL,
+      },
     },
     ganache: {
       chainId: networks["ganache"].chainId,

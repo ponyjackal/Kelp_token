@@ -93,3 +93,25 @@ task("interaction:CrowdSale-addPreSaleInfo")
       console.log("addPreSaleInfo error", e);
     }
   });
+
+task("interaction:CrowdSale-getBNBPrice")
+  .addParam("signer", "Index of the signer in the metamask address list")
+  .setAction(async (taskArguments, { ethers }) => {
+    const accounts = await ethers.getSigners();
+    const index = Number(taskArguments.signer);
+
+    const crowdSaleProxyAddress = readContractAddress("crowdSaleProxy");
+
+    const CrowdSale = await ethers.getContractFactory(
+      "CrowdSale",
+      accounts[index]
+    );
+    const crowdSale = await CrowdSale.attach(crowdSaleProxyAddress);
+
+    try {
+      const prices = await crowdSale.getBNBPrice();
+      console.log("getBNBPrice success", prices);
+    } catch (e) {
+      console.log("getBNBPrice error", e);
+    }
+  });

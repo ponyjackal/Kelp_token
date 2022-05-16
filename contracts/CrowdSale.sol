@@ -8,6 +8,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "./interfaces/IPancakePair.sol";
+import "hardhat/console.sol";
 
 contract CrowdSale is
     Initializable,
@@ -25,6 +27,9 @@ contract CrowdSale is
     address public airdrop;
     // Amount of wei raised
     uint256 public weiRaised;
+    // WBNB/BUSD PancakePair
+    address public constant pancakePairAddress =
+        0x1B96B92314C44b159149f7E0303511fB2Fc4774f;
     struct SaleInfo {
         uint256 rate;
         uint256 startTime;
@@ -321,6 +326,13 @@ contract CrowdSale is
         return sales[_type].paused;
     }
 
+    /**
+     * @dev return BNB price in USD
+     */
+    function getBNBPrice() external view returns (uint256) {
+        return _getBNBPrice();
+    }
+
     // -----------------------------------------
     // Crowdsale external interface
     // -----------------------------------------
@@ -439,5 +451,18 @@ contract CrowdSale is
      */
     function _forwardFunds() internal {
         wallet.transfer(msg.value);
+    }
+
+    /**
+     * @dev return BNB price in USD
+     */
+    function _getBNBPrice() internal view returns (uint256) {
+        (uint256 reserve0, uint256 reserve1, ) = IPancakePair(
+            pancakePairAddress
+        ).getReserves();
+
+        console.log(reserve0);
+
+        return reserve1 / reserve0;
     }
 }
