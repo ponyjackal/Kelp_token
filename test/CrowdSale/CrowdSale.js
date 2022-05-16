@@ -2,6 +2,7 @@ const { artifacts, ethers, waffle } = require("hardhat");
 const { expect } = require("chai");
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+const TENSEC = 10;
 
 const deployCrowdSale = async (signer) => {
   const ARGS = [];
@@ -542,8 +543,6 @@ describe("CrowdSale", function () {
 
   describe("buyTokens", async function () {
     beforeEach(async function () {
-      const TENSEC = 10;
-
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
       const currentTimeStamp = currentBlock.timestamp;
@@ -567,12 +566,12 @@ describe("CrowdSale", function () {
       await this.kelpToken
         .connect(this.signers.airdrop)
         .approve(this.crowdSale.address, ethers.utils.parseEther("2000000000"));
-      // We fast forward to reach the delay
-      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
-      await ethers.provider.send("evm_mine");
     });
 
     it("should buy kelp tokens based on sale rate", async function () {
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
       // check if fundwallet is updated
       await expect(() =>
         this.crowdSale
@@ -599,6 +598,122 @@ describe("CrowdSale", function () {
           .parseEther("0.0000001")
           .mul(ethers.utils.parseEther("0.001"))
       );
+    });
+
+    it("should revert if type is invalid", async function () {
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(this.signers.john.address, 1, {
+          value: ethers.utils.parseEther("0.0000001"),
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("invalid sale");
+    });
+
+    it("should revert if address is invalid", async function () {
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(ZERO_ADDRESS, 0, {
+          value: ethers.utils.parseEther("0.0000001"),
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("invalid address");
+    });
+
+    it("should revert if amount is insufficient", async function () {
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(this.signers.john.address, 0, {
+          value: 0,
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("insufficient amount");
+    });
+
+    it("should revert if sale is paused", async function () {
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+      // pause the sale
+      await this.crowdSale.pauseSale(0, true);
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(this.signers.john.address, 0, {
+          value: ethers.utils.parseEther("0.0000001"),
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("sale is paused");
+    });
+
+    it("should revert if sale is not started yet", async function () {
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(this.signers.john.address, 0, {
+          value: ethers.utils.parseEther("0.0000001"),
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("sale is not started yet");
+    });
+
+    it("should revert if total sale limit exceeds", async function () {
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(this.signers.john.address, 0, {
+          value: ethers.utils.parseEther("0.1"),
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("Total Sale limit exceeds");
+    });
+
+    it("should revert if purchase limit exceeds", async function () {
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const newSaleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + TENSEC,
+        limitPerAccount: "10000000.0",
+        totalLimit: "2000000000.0",
+        paused: false,
+      };
+      // add sales info
+      await this.crowdSale.addSaleInfo(
+        ethers.utils.parseEther(newSaleInfo.rate),
+        newSaleInfo.startTime,
+        ethers.utils.parseEther(newSaleInfo.limitPerAccount),
+        ethers.utils.parseEther(newSaleInfo.totalLimit),
+        newSaleInfo.paused
+      );
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+      // buy tokens
+      const tx = this.crowdSale
+        .connect(this.signers.bell)
+        .buyTokens(this.signers.john.address, 1, {
+          value: ethers.utils.parseEther("0.000001"),
+        });
+      // check revert message
+      await expect(tx).to.be.revertedWith("Purchase limit exceeds");
     });
   });
 });

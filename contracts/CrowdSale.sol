@@ -361,10 +361,10 @@ contract CrowdSale is
         require(_type < sales.length, "invalid sale");
         require(_beneficiary != address(0), "invalid address");
         require(weiAmount != 0, "insufficient amount");
-        require(!sales[_type].paused, "Sale is paused");
+        require(!sales[_type].paused, "sale is paused");
         require(
             block.timestamp >= sales[_type].startTime,
-            "PrivateSale is not started yet"
+            "sale is not started yet"
         );
 
         // calculate sale token amount to be created
