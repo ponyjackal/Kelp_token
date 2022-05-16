@@ -18,7 +18,7 @@ const deployKelpToken = async (signer) => {
 };
 
 describe("CrowdSale", function () {
-  before(async function () {
+  beforeEach(async function () {
     this.signers = {};
 
     const signers = await ethers.getSigners();
@@ -33,15 +33,15 @@ describe("CrowdSale", function () {
     this.signers.justin = signers[7];
 
     // Deploy KelpToken
-    console.log("Before deploy KelpToken");
+    // console.log("Before deploy KelpToken");
     this.kelpToken = await deployKelpToken(this.signers.owner);
-    console.log(`KelpToken is deployed to ${this.kelpToken.address}`);
+    // console.log(`KelpToken is deployed to ${this.kelpToken.address}`);
     // initialize KelpToken
     await this.kelpToken.initialize(this.signers.airdrop.address);
     // Deploy CrowdSale
-    console.log("Before deploy CrowdSale");
+    // console.log("Before deploy CrowdSale");
     this.crowdSale = await deployCrowdSale(this.signers.owner);
-    console.log(`CrowdSale is deployed to ${this.crowdSale.address}`);
+    // console.log(`CrowdSale is deployed to ${this.crowdSale.address}`);
     // initialize CrowdSale
     await this.crowdSale.initialize(
       this.kelpToken.address,
@@ -151,7 +151,7 @@ describe("CrowdSale", function () {
 
   describe("addSaleInfo", async function () {
     it("should return the sales info", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -159,7 +159,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -192,7 +192,7 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if rate is invalid", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -200,7 +200,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -218,7 +218,7 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if startTime is in the past", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -226,7 +226,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp - tenSec,
+        startTime: currentTimeStamp - TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -246,7 +246,7 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if total limit is invalid", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -254,7 +254,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "0",
         paused: false,
@@ -272,7 +272,7 @@ describe("CrowdSale", function () {
     });
 
     it("should emit SaleAdded event", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -280,7 +280,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -308,7 +308,7 @@ describe("CrowdSale", function () {
 
   describe("updateSaleInfo", async function () {
     beforeEach(async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -316,7 +316,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -332,7 +332,7 @@ describe("CrowdSale", function () {
     });
 
     it("should return the updated saleInfo", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
       const type = 0;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
@@ -341,7 +341,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -375,7 +375,7 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if rate is invalid", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
       const type = 0;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
@@ -384,7 +384,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -403,7 +403,7 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if startTime is in the past", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
       const type = 0;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
@@ -412,7 +412,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp - tenSec,
+        startTime: currentTimeStamp - TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -433,7 +433,7 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if total limit is invalid", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
       const type = 0;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
@@ -442,7 +442,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "0",
         paused: false,
@@ -461,7 +461,7 @@ describe("CrowdSale", function () {
     });
 
     it("should emit SaleUpdated event", async function () {
-      const tenSec = 10;
+      const TENSEC = 10;
       type = 0;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
@@ -470,7 +470,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -501,7 +501,7 @@ describe("CrowdSale", function () {
   describe("Pause Sale", async function () {
     beforeEach(async function () {
       // add saleInfo
-      const tenSec = 10;
+      const TENSEC = 10;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -509,7 +509,7 @@ describe("CrowdSale", function () {
 
       const saleInfo = {
         rate: "0.001",
-        startTime: currentTimeStamp + tenSec,
+        startTime: currentTimeStamp + TENSEC,
         limitPerAccount: "0",
         totalLimit: "2000000000",
         paused: false,
@@ -537,6 +537,68 @@ describe("CrowdSale", function () {
       const tx = this.crowdSale.pauseSale(1000000, true);
       // check revert message
       await expect(tx).to.be.revertedWith("invalid type");
+    });
+  });
+
+  describe("buyTokens", async function () {
+    beforeEach(async function () {
+      const TENSEC = 10;
+
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const saleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + TENSEC,
+        limitPerAccount: "0.0",
+        totalLimit: "2000000000.0",
+        paused: false,
+      };
+      // add sales info
+      await this.crowdSale.addSaleInfo(
+        ethers.utils.parseEther(saleInfo.rate),
+        saleInfo.startTime,
+        ethers.utils.parseEther(saleInfo.limitPerAccount),
+        ethers.utils.parseEther(saleInfo.totalLimit),
+        saleInfo.paused
+      );
+      // should allow kelp token to crowdSale contract
+      await this.kelpToken
+        .connect(this.signers.airdrop)
+        .approve(this.crowdSale.address, ethers.utils.parseEther("2000000000"));
+      // We fast forward to reach the delay
+      await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
+      await ethers.provider.send("evm_mine");
+    });
+
+    it("should buy kelp tokens based on sale rate", async function () {
+      // check if fundwallet is updated
+      await expect(() =>
+        this.crowdSale
+          .connect(this.signers.bell)
+          .buyTokens(this.signers.john.address, 0, {
+            value: ethers.utils.parseEther("0.0000001"),
+          })
+      ).to.changeEtherBalance(
+        this.signers.fundWallet,
+        ethers.utils.parseEther("0.0000001")
+      );
+
+      // check if john has tokens
+      await expect(() =>
+        this.crowdSale
+          .connect(this.signers.bell)
+          .buyTokens(this.signers.john.address, 0, {
+            value: ethers.utils.parseEther("0.0000001"),
+          })
+      ).to.changeTokenBalance(
+        this.kelpToken,
+        this.signers.john,
+        ethers.utils
+          .parseEther("0.0000001")
+          .mul(ethers.utils.parseEther("0.001"))
+      );
     });
   });
 });
