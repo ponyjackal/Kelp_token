@@ -329,8 +329,9 @@ contract CrowdSale is
     /**
      * @dev return BNB price in USD
      */
-    function getBNBPrice() external view returns (uint256) {
-        return _getBNBPrice();
+    function getBNBPrice() external view returns (uint256, uint256) {
+        (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
+        return (reserve0, reserve1);
     }
 
     // -----------------------------------------
@@ -367,7 +368,11 @@ contract CrowdSale is
      * @param _beneficiary Address performing the token purchase
      * @param _type Type of sale
      */
-    function buyTokens(address _beneficiary, uint256 _type) public payable {
+    function buyTokens(address _beneficiary, uint256 _type)
+        public
+        payable
+        returns (uint256)
+    {
         uint256 weiAmount = msg.value;
 
         require(_type < sales.length, "invalid sale");
@@ -380,7 +385,7 @@ contract CrowdSale is
         );
 
         // calculate sale token amount to be created
-        uint256 tokens = _getTokenAmount(weiAmount, _type);
+        (uint256 tokens, uint256 bnbPrice) = _getTokenAmount(weiAmount, _type);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
         require(
@@ -403,6 +408,8 @@ contract CrowdSale is
         emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens);
 
         _forwardFunds();
+
+        return bnbPrice;
     }
 
     // -----------------------------------------
@@ -428,9 +435,14 @@ contract CrowdSale is
     function _getTokenAmount(uint256 _weiAmount, uint256 _type)
         internal
         view
-        returns (uint256)
+        returns (uint256, uint256)
     {
-        return _weiAmount.mul(sales[_type].rate);
+        (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
+        uint256 bnbPrice = reserve1.mul(10**5).div(reserve0);
+        return (
+            _weiAmount.mul(sales[_type].rate).mul(bnbPrice).div(10**5),
+            bnbPrice
+        );
     }
 
     /**
@@ -456,13 +468,15 @@ contract CrowdSale is
     /**
      * @dev return BNB price in USD
      */
-    function _getBNBPrice() internal view returns (uint256) {
-        (uint256 reserve0, uint256 reserve1, ) = IPancakePair(
-            pancakePairAddress
-        ).getReserves();
-
-        console.log(reserve0);
-
-        return reserve1 / reserve0;
+    function _getBNBPrice()
+        internal
+        view
+        returns (
+            uint112,
+            uint112,
+            uint32
+        )
+    {
+        return IPancakePair(pancakePairAddress).getReserves();
     }
 }

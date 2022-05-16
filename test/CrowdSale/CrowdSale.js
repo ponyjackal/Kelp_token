@@ -569,34 +569,47 @@ describe("CrowdSale", function () {
     });
 
     it("should buy kelp tokens based on sale rate", async function () {
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
       // We fast forward to reach the delay
       await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
       await ethers.provider.send("evm_mine");
+      // // set next block
+      // await network.provider.send("evm_setNextBlockTimestamp", [
+      //   currentTimeStamp + TENSEC + 1,
+      // ]);
+      // await network.provider.send("evm_mine");
+      // get bnb price
+      const prices = await this.crowdSale.getBNBPrice();
+      const bnbRate = Number.parseFloat(
+        ethers.utils.formatEther(prices[1]) /
+          ethers.utils.formatEther(prices[0])
+      ).toFixed(5);
       // check if fundwallet is updated
       await expect(() =>
         this.crowdSale
           .connect(this.signers.bell)
           .buyTokens(this.signers.john.address, 0, {
-            value: ethers.utils.parseEther("0.0000001"),
+            value: ethers.utils.parseEther("0.0000000001"),
           })
       ).to.changeEtherBalance(
         this.signers.fundWallet,
-        ethers.utils.parseEther("0.0000001")
+        ethers.utils.parseEther("0.0000000001")
       );
-
       // check if john has tokens
       await expect(() =>
         this.crowdSale
           .connect(this.signers.bell)
           .buyTokens(this.signers.john.address, 0, {
-            value: ethers.utils.parseEther("0.0000001"),
+            value: ethers.utils.parseEther("0.0000000001"),
           })
       ).to.changeTokenBalance(
         this.kelpToken,
         this.signers.john,
         ethers.utils
-          .parseEther("0.0000001")
-          .mul(ethers.utils.parseEther("0.001"))
+          .parseEther("0.0000000001")
+          .mul(ethers.utils.parseEther("" + 0.001 * bnbRate))
       );
     });
 
@@ -710,10 +723,22 @@ describe("CrowdSale", function () {
       const tx = this.crowdSale
         .connect(this.signers.bell)
         .buyTokens(this.signers.john.address, 1, {
-          value: ethers.utils.parseEther("0.000001"),
+          value: ethers.utils.parseEther("0.000000001"),
         });
       // check revert message
       await expect(tx).to.be.revertedWith("Purchase limit exceeds");
     });
   });
+
+  // describe("BNB price feed", async function () {
+  //   it("should return BNB price in USD", async function () {
+  //     // get bnb price
+  //     const prices = await this.crowdSale.getBNBPrice();
+  //     console.log(
+  //       "BNB price",
+  //       ethers.utils.formatEther(prices[1]) /
+  //         ethers.utils.formatEther(prices[0])
+  //     );
+  //   });
+  // });
 });
