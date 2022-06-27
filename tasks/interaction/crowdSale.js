@@ -11,6 +11,7 @@ task("interaction:CrowdSale-initialize")
     const crowdSaleProxyAddress = readContractAddress("crowdSaleProxy");
     const kelpTokenProxyAddress = readContractAddress("kelpTokenProxy");
     const crowdSaleWalletAddress = readContractAddress("crowdSaleWallet");
+    const kelpAirdropProxyAddress = readContractAddress("kelpAirdropProxy");
 
     const CrowdSale = await ethers.getContractFactory(
       "CrowdSale",
@@ -19,7 +20,11 @@ task("interaction:CrowdSale-initialize")
     const crowdSale = await CrowdSale.attach(crowdSaleProxyAddress);
 
     try {
-      await crowdSale.initialize(kelpTokenProxyAddress, crowdSaleWalletAddress);
+      await crowdSale.initialize(
+        kelpTokenProxyAddress,
+        crowdSaleWalletAddress,
+        kelpAirdropProxyAddress
+      );
       console.log("initialize success");
     } catch (e) {
       console.log("initialize error", e);
