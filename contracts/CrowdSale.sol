@@ -347,9 +347,7 @@ contract CrowdSale is
         (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
         uint256 bnbPrice = reserve1.mul(10**5).div(reserve0);
         return (
-            _weiAmount.mul(sales[_type].rate).mul(bnbPrice).div(10**5).div(
-                10**18
-            ),
+            _weiAmount.mul(sales[_type].rate).mul(bnbPrice).div(10**18),
             bnbPrice
         );
     }
