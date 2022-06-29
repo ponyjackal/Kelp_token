@@ -123,12 +123,13 @@ task("interaction:CrowdSale-getBNBPrice")
 
 task("interaction:CrowdSale-buyTokens")
   .addParam("signer", "Index of the signer in the metamask address list")
+  .addParam("beneficiary", "The address of token receiver")
+  .addParam("type", "The type of toke sale")
   .setAction(async (taskArguments, { ethers }) => {
     const accounts = await ethers.getSigners();
     const index = Number(taskArguments.signer);
-
-    const beneficiary = "0xFB6c5feE537344Db0f585d65C684fbc2A800d0a8";
-    const saleType = 0;
+    const beneficiary = taskArguments.beneficiary;
+    const type = Number(taskArguments.type);
 
     const crowdSaleProxyAddress = readContractAddress("crowdSaleProxy");
 
@@ -139,7 +140,7 @@ task("interaction:CrowdSale-buyTokens")
     const crowdSale = await CrowdSale.attach(crowdSaleProxyAddress);
 
     try {
-      const bnbPrice = await crowdSale.buyTokens(beneficiary, saleType, {
+      const bnbPrice = await crowdSale.buyTokens(beneficiary, type, {
         value: ethers.utils.parseEther("0.01"),
       });
       console.log("buyTokens success", bnbPrice);
