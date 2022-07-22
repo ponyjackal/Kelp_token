@@ -329,9 +329,10 @@ contract CrowdSale is
     /**
      * @dev return BNB price in USD
      */
-    function getBNBPrice() external view returns (uint256, uint256) {
+    function getBNBPrice() external view returns (uint256) {
         (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
-        return (reserve0, reserve1);
+        uint256 bnbPrice = reserve1.mul(10**18).div(reserve0);
+        return bnbPrice;
     }
 
     /**
@@ -342,20 +343,11 @@ contract CrowdSale is
     function getTokenAmount(uint256 _weiAmount, uint256 _type)
         public
         view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
+        returns (uint256, uint256)
     {
         (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
-        return (
-            _weiAmount.mul(reserve1).mul(10**18).div(sales[_type].rate).div(
-                reserve0
-            ),
-            reserve0,
-            reserve1
-        );
+        uint256 bnbPrice = reserve1.mul(10**18).div(reserve0);
+        return (_weiAmount.mul(bnbPrice).div(sales[_type].rate), bnbPrice);
     }
 
     // -----------------------------------------
@@ -395,7 +387,7 @@ contract CrowdSale is
     function buyTokens(address _beneficiary, uint256 _type)
         public
         payable
-        returns (uint256, uint256)
+        returns (uint256)
     {
         uint256 weiAmount = msg.value;
 
@@ -409,10 +401,7 @@ contract CrowdSale is
         );
 
         // calculate sale token amount to be created
-        (uint256 tokens, uint256 reserve0, uint256 reserve1) = getTokenAmount(
-            weiAmount,
-            _type
-        );
+        (uint256 tokens, uint256 bnbPrice) = getTokenAmount(weiAmount, _type);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
         require(
@@ -436,7 +425,7 @@ contract CrowdSale is
 
         _forwardFunds();
 
-        return (reserve0, reserve1);
+        return bnbPrice;
     }
 
     // -----------------------------------------
