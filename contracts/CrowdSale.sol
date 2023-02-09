@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -28,7 +29,7 @@ contract CrowdSale is
     // Amount of wei raised
     uint256 public weiRaised;
     // WBNB/BUSD PancakePair
-    address public constant pancakePairAddress =
+    address public constant PANCAKE_PAIR_ADDRESS =
         0x1B96B92314C44b159149f7E0303511fB2Fc4774f;
     struct SaleInfo {
         uint256 rate;
@@ -45,6 +46,14 @@ contract CrowdSale is
     SaleInfo[] public sales;
     mapping(uint256 => mapping(address => uint256)) public purchases;
     mapping(uint256 => uint256) public totalSales;
+
+    /** For token purchase in BUSD */
+
+    // Amount of BUSD raised
+    uint256 public usdRaised;
+    // BUSD address
+    address public constant BUSD_ADDRESS =
+        0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
 
     // -----------------------------------------
     // Crowdsale Events
@@ -363,33 +372,47 @@ contract CrowdSale is
      * @dev fallback function ***DO NOT OVERRIDE***
      */
     fallback() external payable {
-        buyActiveSaleTokens(msg.sender);
+        buyActiveSaleTokensBNB(msg.sender);
     }
 
     /**
      * @dev receive function ***DO NOT OVERRIDE***
      */
     receive() external payable {
-        buyActiveSaleTokens(msg.sender);
+        buyActiveSaleTokensBNB(msg.sender);
     }
 
     /**
      * @dev buy tokens for current active sale
      * @param _beneficiary Address performing the token purchase
      */
-    function buyActiveSaleTokens(address _beneficiary) public payable {
+    function buyActiveSaleTokensBNB(address _beneficiary) public payable {
         uint256 activeSaleType = _getActiveSaleType();
         require(activeSaleType < sales.length, "no active sales");
 
-        buyTokens(_beneficiary, activeSaleType);
+        buyTokensBNB(_beneficiary, activeSaleType);
     }
 
     /**
-     * @dev low level private token purchase ***DO NOT OVERRIDE***
+     * @dev buy tokens for current active sale
+     * @param _beneficiary Address performing the token purchase
+     * @param _amount BUSD amount
+     */
+    function buyActiveSaleTokensBUSD(address _beneficiary, uint256 _amount)
+        public
+    {
+        uint256 activeSaleType = _getActiveSaleType();
+        require(activeSaleType < sales.length, "no active sales");
+
+        buyTokensBUSD(_beneficiary, activeSaleType, _amount);
+    }
+
+    /**
+     * @dev low level private token purchase with BNB ***DO NOT OVERRIDE***
      * @param _beneficiary Address performing the token purchase
      * @param _type Type of sale
      */
-    function buyTokens(address _beneficiary, uint256 _type)
+    function buyTokensBNB(address _beneficiary, uint256 _type)
         public
         payable
         returns (uint256)
@@ -398,14 +421,14 @@ contract CrowdSale is
 
         require(_type < sales.length, "invalid sale");
         require(_beneficiary != address(0), "invalid address");
-        require(weiAmount != 0, "insufficient amount");
+        require(weiAmount > 0, "insufficient amount");
         require(!sales[_type].paused, "sale is paused");
         require(
             block.timestamp >= sales[_type].startTime,
             "sale is not started yet"
         );
 
-        // calculate sale token amount to be created
+        // calculate sale token amount to be transferred
         (uint256 tokens, uint256 bnbPrice) = getTokenAmount(weiAmount, _type);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
@@ -431,6 +454,52 @@ contract CrowdSale is
         _forwardFunds();
 
         return bnbPrice;
+    }
+
+    /**
+     * @dev low level private token purchase with BUSD ***DO NOT OVERRIDE***
+     * @param _beneficiary Address performing the token purchase
+     * @param _type Type of sale
+     * @param _amount BUSD amount
+     */
+    function buyTokensBUSD(
+        address _beneficiary,
+        uint256 _type,
+        uint256 _amount
+    ) public {
+        require(_type < sales.length, "invalid sale");
+        require(_beneficiary != address(0), "invalid address");
+        require(_amount > 0, "insufficient amount");
+        require(!sales[_type].paused, "sale is paused");
+        require(
+            block.timestamp >= sales[_type].startTime,
+            "sale is not started yet"
+        );
+
+        // transfer BUSD from user to treasury wallet
+        IERC20(BUSD_ADDRESS).transferFrom(msg.sender, wallet, _amount);
+        // calculate sale token amount to be transferred
+        uint256 tokens = _amount.div(10**6).div(sales[_type].rate);
+        // update total sales
+        totalSales[_type] = totalSales[_type].add(tokens);
+        require(
+            totalSales[_type] <= sales[_type].totalLimit,
+            "Total Sale limit exceeds"
+        );
+        // update personal purchased amount
+        purchases[_type][_beneficiary] = purchases[_type][_beneficiary].add(
+            tokens
+        );
+        require(
+            sales[_type].limitPerAccount == 0 ||
+                purchases[_type][_beneficiary] <= sales[_type].limitPerAccount,
+            "Purchase limit exceeds"
+        );
+        // update wei raised state
+        usdRaised = usdRaised.add(_amount);
+        // deliver tokens
+        _deliverTokens(_beneficiary, tokens);
+        emit TokenPurchase(msg.sender, _beneficiary, _amount, tokens);
     }
 
     // -----------------------------------------
@@ -480,6 +549,6 @@ contract CrowdSale is
             uint32
         )
     {
-        return IPancakePair(pancakePairAddress).getReserves();
+        return IPancakePair(PANCAKE_PAIR_ADDRESS).getReserves();
     }
 }
