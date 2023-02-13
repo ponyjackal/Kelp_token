@@ -1,6 +1,7 @@
 const { artifacts, ethers, waffle } = require("hardhat");
 const { expect } = require("chai");
 const { describe, beforeEach, it } = require("mocha");
+const { toWei } = require("../../utils/format");
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const TENSEC = 10;
@@ -170,8 +171,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // rate
@@ -182,12 +183,10 @@ describe("CrowdSale", function () {
       expect(startTime).to.equal(saleInfo.startTime);
       // limitPerAccount
       const limitPerAccount = await this.crowdSale.getLimitPerAccount(0);
-      expect(limitPerAccount).to.equal(
-        ethers.utils.parseEther(saleInfo.limitPerAccount)
-      );
+      expect(limitPerAccount).to.equal(toWei(saleInfo.limitPerAccount, 6));
       // totalLimit
       const totalLimit = await this.crowdSale.getTotalLimit(0);
-      expect(totalLimit).to.equal(ethers.utils.parseEther(saleInfo.totalLimit));
+      expect(totalLimit).to.equal(toWei(saleInfo.totalLimit, 6));
       // paused
       const paused = await this.crowdSale.isPaused(0);
       expect(paused).to.equal(saleInfo.paused);
@@ -211,8 +210,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -237,8 +236,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -265,8 +264,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -291,8 +290,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -301,8 +300,8 @@ describe("CrowdSale", function () {
         .withArgs(
           ethers.utils.parseEther(saleInfo.rate),
           saleInfo.startTime,
-          ethers.utils.parseEther(saleInfo.limitPerAccount),
-          ethers.utils.parseEther(saleInfo.totalLimit),
+          toWei(saleInfo.limitPerAccount, 6),
+          toWei(saleInfo.totalLimit, 6),
           saleInfo.paused
         );
     });
@@ -327,8 +326,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
     });
@@ -520,8 +519,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
     });
@@ -542,7 +541,7 @@ describe("CrowdSale", function () {
     });
   });
 
-  describe("buyTokens", async function () {
+  describe("buyTokensBNB", async function () {
     beforeEach(async function () {
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -559,8 +558,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // should allow kelp token to crowdSale contract
@@ -697,14 +696,20 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(newSaleInfo.rate),
         newSaleInfo.startTime,
-        ethers.utils.parseEther(newSaleInfo.limitPerAccount),
-        ethers.utils.parseEther(newSaleInfo.totalLimit),
+        toWei(newSaleInfo.limitPerAccount, 6),
+        toWei(newSaleInfo.totalLimit, 6),
         newSaleInfo.paused
       );
 
       // We fast forward to reach the delay
       await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
       await ethers.provider.send("evm_mine");
+      // get token amount
+      const tokenAmount = await this.crowdSale.getTokenAmount(
+        ethers.utils.parseEther("1"),
+        1
+      );
+      console.log("tokenAmount", tokenAmount);
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
@@ -731,8 +736,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(newSaleInfo.rate),
         newSaleInfo.startTime,
-        ethers.utils.parseEther(newSaleInfo.limitPerAccount),
-        ethers.utils.parseEther(newSaleInfo.totalLimit),
+        toWei(newSaleInfo.limitPerAccount, 6),
+        toWei(newSaleInfo.totalLimit, 6),
         newSaleInfo.paused
       );
       // We fast forward to reach the delay
