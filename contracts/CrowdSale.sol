@@ -479,7 +479,7 @@ contract CrowdSale is
         // transfer BUSD from user to treasury wallet
         IERC20(BUSD_ADDRESS).transferFrom(msg.sender, wallet, _amount);
         // calculate sale token amount to be transferred
-        uint256 tokens = _amount.div(10**6).div(sales[_type].rate);
+        uint256 tokens = _amount.mul(10**6).div(sales[_type].rate);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
         require(
@@ -527,7 +527,7 @@ contract CrowdSale is
             }
         }
 
-        return sales.length;
+        return sales.length - 1;
     }
 
     /**
