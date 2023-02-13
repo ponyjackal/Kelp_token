@@ -582,36 +582,34 @@ describe("CrowdSale", function () {
       // ]);
       // await network.provider.send("evm_mine");
       // get bnb price
-      const prices = await this.crowdSale.getBNBPrice();
-      const bnbRate = Number.parseFloat(
-        ethers.utils.formatEther(prices[1]) /
-          ethers.utils.formatEther(prices[0])
-      ).toFixed(5);
+      const bnbPrice = await this.crowdSale.getBNBPrice();
       // check if fundwallet is updated
       await expect(() =>
         this.crowdSale
           .connect(this.signers.bell)
           .buyTokensBNB(this.signers.john.address, 0, {
-            value: ethers.utils.parseEther("0.0000000001"),
+            value: ethers.utils.parseEther("1"),
           })
       ).to.changeEtherBalance(
         this.signers.fundWallet,
-        ethers.utils.parseEther("0.0000000001")
+        ethers.utils.parseEther("1")
       );
       // check if john has tokens
-      // await expect(() =>
-      //   this.crowdSale
-      //     .connect(this.signers.bell)
-      //     .buyTokensBNB(this.signers.john.address, 0, {
-      //       value: ethers.utils.parseEther("0.0000000001"),
-      //     })
-      // ).to.changeTokenBalance(
-      //   this.kelpToken,
-      //   this.signers.john,
-      //   ethers.utils
-      //     .parseEther("0.0000000001")
-      //     .mul(ethers.utils.parseEther("" + 0.001 * bnbRate))
-      // );
+      await expect(() =>
+        this.crowdSale
+          .connect(this.signers.bell)
+          .buyTokensBNB(this.signers.john.address, 0, {
+            value: ethers.utils.parseEther("1"),
+          })
+      ).to.changeTokenBalance(
+        this.kelpToken,
+        this.signers.john,
+        ethers.utils
+          .parseEther("1")
+          .mul(bnbPrice)
+          .div(ethers.utils.parseEther("0.001"))
+          .div(ethers.BigNumber.from("1000000000000"))
+      );
     });
 
     it("should revert if type is invalid", async function () {
@@ -684,14 +682,34 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if total sale limit exceeds", async function () {
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const newSaleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + TENSEC,
+        limitPerAccount: "1000.0",
+        totalLimit: "2000.0",
+        paused: false,
+      };
+      // add sales info
+      await this.crowdSale.addSaleInfo(
+        ethers.utils.parseEther(newSaleInfo.rate),
+        newSaleInfo.startTime,
+        ethers.utils.parseEther(newSaleInfo.limitPerAccount),
+        ethers.utils.parseEther(newSaleInfo.totalLimit),
+        newSaleInfo.paused
+      );
+
       // We fast forward to reach the delay
       await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
       await ethers.provider.send("evm_mine");
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokensBNB(this.signers.john.address, 0, {
-          value: ethers.utils.parseEther("0.1"),
+        .buyTokensBNB(this.signers.john.address, 1, {
+          value: ethers.utils.parseEther("1"),
         });
       // check revert message
       await expect(tx).to.be.revertedWith("Total Sale limit exceeds");
@@ -705,8 +723,8 @@ describe("CrowdSale", function () {
       const newSaleInfo = {
         rate: "0.001",
         startTime: currentTimeStamp + TENSEC,
-        limitPerAccount: "10000000.0",
-        totalLimit: "2000000000.0",
+        limitPerAccount: "1000.0",
+        totalLimit: "2000000.0",
         paused: false,
       };
       // add sales info
@@ -724,22 +742,10 @@ describe("CrowdSale", function () {
       const tx = this.crowdSale
         .connect(this.signers.bell)
         .buyTokensBNB(this.signers.john.address, 1, {
-          value: ethers.utils.parseEther("0.000000001"),
+          value: ethers.utils.parseEther("1"),
         });
       // check revert message
       await expect(tx).to.be.revertedWith("Purchase limit exceeds");
     });
   });
-
-  // describe("BNB price feed", async function () {
-  //   it("should return BNB price in USD", async function () {
-  //     // get bnb price
-  //     const prices = await this.crowdSale.getBNBPrice();
-  //     console.log(
-  //       "BNB price",
-  //       ethers.utils.formatEther(prices[1]) /
-  //         ethers.utils.formatEther(prices[0])
-  //     );
-  //   });
-  // });
 });
