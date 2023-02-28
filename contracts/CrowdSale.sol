@@ -356,12 +356,7 @@ contract CrowdSale is
     {
         (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
         uint256 bnbPrice = reserve1.mul(10**18).div(reserve0);
-        return (
-            _weiAmount.mul(bnbPrice).mul(10**6).div(sales[_type].rate).div(
-                10**18
-            ),
-            bnbPrice
-        );
+        return (_weiAmount.mul(bnbPrice).div(sales[_type].rate), bnbPrice);
     }
 
     // -----------------------------------------
@@ -479,7 +474,7 @@ contract CrowdSale is
         // transfer BUSD from user to treasury wallet
         IERC20(BUSD_ADDRESS).transferFrom(msg.sender, wallet, _amount);
         // calculate sale token amount to be transferred
-        uint256 tokens = _amount.mul(10**6).div(sales[_type].rate);
+        uint256 tokens = _amount.mul(10**18).div(sales[_type].rate);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
         require(
