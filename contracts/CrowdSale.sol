@@ -55,6 +55,9 @@ contract CrowdSale is
     address public constant BUSD_ADDRESS =
         0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
 
+    // Kelp token decimal factor
+    uint256 public constant KELP_DECIMAL_FACTOR = 10**6;
+
     // -----------------------------------------
     // Crowdsale Events
     // -----------------------------------------
@@ -356,7 +359,14 @@ contract CrowdSale is
     {
         (uint256 reserve0, uint256 reserve1, ) = _getBNBPrice();
         uint256 bnbPrice = reserve1.mul(10**18).div(reserve0);
-        return (_weiAmount.mul(bnbPrice).div(sales[_type].rate), bnbPrice);
+        return (
+            _weiAmount
+                .mul(bnbPrice)
+                .mul(KELP_DECIMAL_FACTOR)
+                .div(sales[_type].rate)
+                .div(10**18),
+            bnbPrice
+        );
     }
 
     // -----------------------------------------
@@ -474,7 +484,11 @@ contract CrowdSale is
         // transfer BUSD from user to treasury wallet
         IERC20(BUSD_ADDRESS).transferFrom(msg.sender, wallet, _amount);
         // calculate sale token amount to be transferred
-        uint256 tokens = _amount.mul(10**18).div(sales[_type].rate);
+        uint256 tokens = _amount
+            .mul(10**18)
+            .mul(KELP_DECIMAL_FACTOR)
+            .div(sales[_type].rate)
+            .div(10**18);
         // update total sales
         totalSales[_type] = totalSales[_type].add(tokens);
         require(
