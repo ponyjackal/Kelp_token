@@ -1,6 +1,6 @@
 {
   "rate": "0.01",
-  "startTime": 1675238400,
+  "startTime": 1680332400,
   "limitPerAccount": "1000000",
   "totalLimit": "24000000000",
   "paused": false
