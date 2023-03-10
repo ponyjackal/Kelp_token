@@ -1,5 +1,7 @@
 const { artifacts, ethers, waffle } = require("hardhat");
 const { expect } = require("chai");
+const { describe, beforeEach, it } = require("mocha");
+const { toWei } = require("../../utils/format");
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const TENSEC = 10;
@@ -169,8 +171,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // rate
@@ -181,12 +183,10 @@ describe("CrowdSale", function () {
       expect(startTime).to.equal(saleInfo.startTime);
       // limitPerAccount
       const limitPerAccount = await this.crowdSale.getLimitPerAccount(0);
-      expect(limitPerAccount).to.equal(
-        ethers.utils.parseEther(saleInfo.limitPerAccount)
-      );
+      expect(limitPerAccount).to.equal(toWei(saleInfo.limitPerAccount, 6));
       // totalLimit
       const totalLimit = await this.crowdSale.getTotalLimit(0);
-      expect(totalLimit).to.equal(ethers.utils.parseEther(saleInfo.totalLimit));
+      expect(totalLimit).to.equal(toWei(saleInfo.totalLimit, 6));
       // paused
       const paused = await this.crowdSale.isPaused(0);
       expect(paused).to.equal(saleInfo.paused);
@@ -210,8 +210,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -236,8 +236,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -264,8 +264,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -290,8 +290,8 @@ describe("CrowdSale", function () {
       const transaction = this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // check revert message
@@ -300,8 +300,8 @@ describe("CrowdSale", function () {
         .withArgs(
           ethers.utils.parseEther(saleInfo.rate),
           saleInfo.startTime,
-          ethers.utils.parseEther(saleInfo.limitPerAccount),
-          ethers.utils.parseEther(saleInfo.totalLimit),
+          toWei(saleInfo.limitPerAccount, 6),
+          toWei(saleInfo.totalLimit, 6),
           saleInfo.paused
         );
     });
@@ -326,8 +326,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
     });
@@ -463,7 +463,7 @@ describe("CrowdSale", function () {
 
     it("should emit SaleUpdated event", async function () {
       const TENSEC = 10;
-      type = 0;
+      const type = 0;
 
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -519,8 +519,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
     });
@@ -541,7 +541,7 @@ describe("CrowdSale", function () {
     });
   });
 
-  describe("buyTokens", async function () {
+  describe("buyTokensBNB", async function () {
     beforeEach(async function () {
       const currentBlockNumber = await ethers.provider.getBlockNumber();
       const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
@@ -558,8 +558,8 @@ describe("CrowdSale", function () {
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(saleInfo.rate),
         saleInfo.startTime,
-        ethers.utils.parseEther(saleInfo.limitPerAccount),
-        ethers.utils.parseEther(saleInfo.totalLimit),
+        toWei(saleInfo.limitPerAccount, 6),
+        toWei(saleInfo.totalLimit, 6),
         saleInfo.paused
       );
       // should allow kelp token to crowdSale contract
@@ -581,35 +581,33 @@ describe("CrowdSale", function () {
       // ]);
       // await network.provider.send("evm_mine");
       // get bnb price
-      const prices = await this.crowdSale.getBNBPrice();
-      const bnbRate = Number.parseFloat(
-        ethers.utils.formatEther(prices[1]) /
-          ethers.utils.formatEther(prices[0])
-      ).toFixed(5);
+      const bnbPrice = await this.crowdSale.getBNBPrice();
       // check if fundwallet is updated
       await expect(() =>
         this.crowdSale
           .connect(this.signers.bell)
-          .buyTokens(this.signers.john.address, 0, {
-            value: ethers.utils.parseEther("0.0000000001"),
+          .buyTokensBNB(this.signers.john.address, 0, {
+            value: ethers.utils.parseEther("1"),
           })
       ).to.changeEtherBalance(
         this.signers.fundWallet,
-        ethers.utils.parseEther("0.0000000001")
+        ethers.utils.parseEther("1")
       );
       // check if john has tokens
       await expect(() =>
         this.crowdSale
           .connect(this.signers.bell)
-          .buyTokens(this.signers.john.address, 0, {
-            value: ethers.utils.parseEther("0.0000000001"),
+          .buyTokensBNB(this.signers.john.address, 0, {
+            value: ethers.utils.parseEther("1"),
           })
       ).to.changeTokenBalance(
         this.kelpToken,
         this.signers.john,
         ethers.utils
-          .parseEther("0.0000000001")
-          .mul(ethers.utils.parseEther("" + 0.001 * bnbRate))
+          .parseEther("1")
+          .mul(bnbPrice)
+          .div(ethers.utils.parseEther("0.001"))
+          .div(ethers.BigNumber.from("1000000000000"))
       );
     });
 
@@ -620,7 +618,7 @@ describe("CrowdSale", function () {
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(this.signers.john.address, 1, {
+        .buyTokensBNB(this.signers.john.address, 1, {
           value: ethers.utils.parseEther("0.0000001"),
         });
       // check revert message
@@ -634,7 +632,7 @@ describe("CrowdSale", function () {
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(ZERO_ADDRESS, 0, {
+        .buyTokensBNB(ZERO_ADDRESS, 0, {
           value: ethers.utils.parseEther("0.0000001"),
         });
       // check revert message
@@ -648,7 +646,7 @@ describe("CrowdSale", function () {
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(this.signers.john.address, 0, {
+        .buyTokensBNB(this.signers.john.address, 0, {
           value: 0,
         });
       // check revert message
@@ -664,7 +662,7 @@ describe("CrowdSale", function () {
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(this.signers.john.address, 0, {
+        .buyTokensBNB(this.signers.john.address, 0, {
           value: ethers.utils.parseEther("0.0000001"),
         });
       // check revert message
@@ -675,7 +673,7 @@ describe("CrowdSale", function () {
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(this.signers.john.address, 0, {
+        .buyTokensBNB(this.signers.john.address, 0, {
           value: ethers.utils.parseEther("0.0000001"),
         });
       // check revert message
@@ -683,14 +681,40 @@ describe("CrowdSale", function () {
     });
 
     it("should revert if total sale limit exceeds", async function () {
+      const currentBlockNumber = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
+      const currentTimeStamp = currentBlock.timestamp;
+
+      const newSaleInfo = {
+        rate: "0.001",
+        startTime: currentTimeStamp + TENSEC,
+        limitPerAccount: "1000.0",
+        totalLimit: "2000.0",
+        paused: false,
+      };
+      // add sales info
+      await this.crowdSale.addSaleInfo(
+        ethers.utils.parseEther(newSaleInfo.rate),
+        newSaleInfo.startTime,
+        toWei(newSaleInfo.limitPerAccount, 6),
+        toWei(newSaleInfo.totalLimit, 6),
+        newSaleInfo.paused
+      );
+
       // We fast forward to reach the delay
       await ethers.provider.send("evm_increaseTime", [TENSEC + 1]);
       await ethers.provider.send("evm_mine");
+      // get token amount
+      const tokenAmount = await this.crowdSale.getTokenAmount(
+        ethers.utils.parseEther("1"),
+        1
+      );
+      console.log("tokenAmount", tokenAmount);
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(this.signers.john.address, 0, {
-          value: ethers.utils.parseEther("0.1"),
+        .buyTokensBNB(this.signers.john.address, 1, {
+          value: ethers.utils.parseEther("1"),
         });
       // check revert message
       await expect(tx).to.be.revertedWith("Total Sale limit exceeds");
@@ -704,16 +728,16 @@ describe("CrowdSale", function () {
       const newSaleInfo = {
         rate: "0.001",
         startTime: currentTimeStamp + TENSEC,
-        limitPerAccount: "10000000.0",
-        totalLimit: "2000000000.0",
+        limitPerAccount: "1000.0",
+        totalLimit: "2000000.0",
         paused: false,
       };
       // add sales info
       await this.crowdSale.addSaleInfo(
         ethers.utils.parseEther(newSaleInfo.rate),
         newSaleInfo.startTime,
-        ethers.utils.parseEther(newSaleInfo.limitPerAccount),
-        ethers.utils.parseEther(newSaleInfo.totalLimit),
+        toWei(newSaleInfo.limitPerAccount, 6),
+        toWei(newSaleInfo.totalLimit, 6),
         newSaleInfo.paused
       );
       // We fast forward to reach the delay
@@ -722,23 +746,11 @@ describe("CrowdSale", function () {
       // buy tokens
       const tx = this.crowdSale
         .connect(this.signers.bell)
-        .buyTokens(this.signers.john.address, 1, {
-          value: ethers.utils.parseEther("0.000000001"),
+        .buyTokensBNB(this.signers.john.address, 1, {
+          value: ethers.utils.parseEther("1"),
         });
       // check revert message
       await expect(tx).to.be.revertedWith("Purchase limit exceeds");
     });
   });
-
-  // describe("BNB price feed", async function () {
-  //   it("should return BNB price in USD", async function () {
-  //     // get bnb price
-  //     const prices = await this.crowdSale.getBNBPrice();
-  //     console.log(
-  //       "BNB price",
-  //       ethers.utils.formatEther(prices[1]) /
-  //         ethers.utils.formatEther(prices[0])
-  //     );
-  //   });
-  // });
 });

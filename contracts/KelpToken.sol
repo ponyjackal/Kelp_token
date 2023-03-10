@@ -24,8 +24,8 @@ contract KelpToken is
 
     // Kelp Token parameters
     string public constant name = "Kelp Finance";
-    string public constant symbol = "tKELP";
-    uint8 public constant decimals = 18;
+    string public constant symbol = "ttKELP";
+    uint8 public constant decimals = 6;
     uint256 public constant decimalFactor = 10**uint256(decimals);
     uint256 public constant totalSupply = 1000000000 * decimalFactor;
 

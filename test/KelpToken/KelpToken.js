@@ -1,5 +1,6 @@
 const { artifacts, ethers, waffle } = require("hardhat");
 const { expect } = require("chai");
+const { describe, before, it } = require("mocha");
 
 const deployKelpToken = async (signer) => {
   const ARGS = [];
@@ -39,12 +40,12 @@ describe("Unit tests", function () {
 
     expect(aliceBalance).to.equal("0");
 
-    // balanceOf should return 1000000000 * 10 ^ 18 for airdrop
+    // balanceOf should return 1000000000 * 10 ^ 6 for airdrop
     const airdropBalance = await this.kelpToken.balanceOf(
       this.signers.airdrop.address
     );
 
-    expect(airdropBalance).to.equal("1000000000000000000000000000");
+    expect(airdropBalance).to.equal("1000000000000000");
   });
 
   it("should transfer tokens", async function () {
